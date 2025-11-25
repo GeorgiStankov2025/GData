@@ -1,0 +1,6 @@
+@GData_HostAddress = http://localhost:5150
+
+GET {{GData_HostAddress}}/GData/
+Accept: application/json
+
+###
