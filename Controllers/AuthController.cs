@@ -15,9 +15,9 @@ namespace GData.Controllers
         public async Task<ActionResult<User>> Register(RegisterUserDTO request)
         {
 
-            var result=await authServices.RegisterService(request);
-            
-            if(result is not null)
+            var result = await authServices.RegisterService(request);
+
+            if (result is not null)
             {
 
                 return Ok(result);
@@ -31,6 +31,66 @@ namespace GData.Controllers
             }
 
         }
-    
+
+        [HttpGet("get-User-By-Username")]
+        public async Task<ActionResult<User>> GetUserByUsername(string username)
+        {
+
+            var result = await authServices.GetUserByUsernameService(username);
+
+            if(result!=null)
+            {
+
+                return Ok(result);
+
+            }
+            else
+            {
+
+                return NotFound();
+
+            }    
+        }
+
+        [HttpGet("get-User-By-Id{Id}")]
+        public async Task<ActionResult<User>> GetUserById(Guid Id)
+        {
+
+            var result = await authServices.GetUserByIdService(Id);
+
+            if (result != null)
+            {
+
+                return Ok(result);
+
+            }
+            else
+            {
+
+                return NotFound();
+
+            }
+        }
+
+        [HttpPost("verify-Account")]
+        public async Task<ActionResult<bool>> VerifyAccount(Guid Id, int code)
+        {
+
+            var result = await authServices.VerifyAccountService(Id, code);
+
+            if(result is true)
+            {
+
+                return Ok(result);
+
+            }
+            else
+            {
+
+                return BadRequest("Wrong code or user!");
+
+            }
+        }
+
     }
 }

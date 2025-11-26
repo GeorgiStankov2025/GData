@@ -9,7 +9,7 @@ namespace GData.Repositories.Users
         public Task<User> Login(string username, string password);
         public Task<User> Logout();
         public Task<User> ChangePassword(User user);
-        public Task<User> VerifyEmail();
+        public Task<bool> VerifyAccount(User user, int code);
         public Task<User> GetUserById(Guid Id);
         public Task<User> GetUserByUsername(string username);
 

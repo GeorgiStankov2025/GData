@@ -4,6 +4,7 @@ using GData.Repositories.Users;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
+using System.Linq.Expressions;
 
 
 
@@ -16,8 +17,6 @@ namespace GData.Services
         {
 
             var email = new MimeMessage();
-
-            
 
             email.From.Add(MailboxAddress.Parse("bitproductions2024@gmail.com"));
             email.To.Add(MailboxAddress.Parse(user.Email));
@@ -40,44 +39,91 @@ namespace GData.Services
 
         public async Task<User> RegisterService(RegisterUserDTO request)
         {
-            
-          if (request != null&& request.Username!=string.Empty&&request.Password!=string.Empty&&
-          request.Firstname!=string.Empty&&request.Lastname!=string.Empty&&
-          request.Email!=string.Empty&&request.Username.Length>=8&&request.Password.Length>=8&&request.Firstname.Length>=2&&request.Lastname.Length>=2)
-          {
-            
-              try
-              {
+            try
+            {
+                if (request != null && request.Username != string.Empty && request.Password != string.Empty &&
+                request.Firstname != string.Empty && request.Lastname != string.Empty &&
+                request.Email != string.Empty && request.Username.Length >= 8 && request.Password.Length >= 8 && request.Firstname.Length >= 2 && request.Lastname.Length >= 2)
+                {
 
-                 _ = new System.Net.Mail.MailAddress(request.Email);
+                    _ = new System.Net.Mail.MailAddress(request.Email);
 
-                 var result = await authRepository.Register(request);
-                 if (result is not null)
-                 {  
-                        
-                     SendEmailRegistration(result);
-                     return result;
+                    var result = await authRepository.Register(request);
+                    SendEmailRegistration(result);
+                    return result;
 
-                 }
-                 else return null;
-
-              }
-              catch (System.FormatException)
-              {
-
+                }
+                else
+                {
                     return null;
+                }
+            }
+            catch(FormatException ex)
+            {
 
-              }
-                
-          }
+                return null;
 
-          else
-          {
+            }
+        }
 
-            return null;
+        public async Task<bool> VerifyAccountService(Guid Id,int code)
+        {
 
-          }
-        
+            var user = await authRepository.GetUserById(Id);
+
+            if (user != null)
+            {
+                var result = await authRepository.VerifyAccount(user, code);
+
+                if (result is true)
+                {
+
+                    return true;
+
+                }
+
+                else return false;
+            }
+            else return false;
+
+        }
+
+        public async Task<User> GetUserByUsernameService(string username)
+        {
+            
+            var result = await authRepository.GetUserByUsername(username);
+            if(result is not null)
+            {
+
+                return result;
+
+            }
+            else
+            {
+
+                return null;
+
+            }
+
+        }
+
+        public async Task<User> GetUserByIdService(Guid Id)
+        {
+
+            var result = await authRepository.GetUserById(Id);
+            if (result is not null)
+            {
+
+                return result;
+
+            }
+            else
+            {
+
+                return null;
+
+            }
+
         }
     }
 }

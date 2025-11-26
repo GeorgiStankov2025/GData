@@ -5,8 +5,11 @@ namespace GData.Services
 {
     public interface IAuthServices
     {
-
         public Task<User> RegisterService(RegisterUserDTO request);
+        public Task<bool> VerifyAccountService(Guid Id,int code);
+        public Task<User> GetUserByUsernameService(string username);
+        public Task<User> GetUserByIdService(Guid Id);
 
     }
+
 }

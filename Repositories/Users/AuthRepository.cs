@@ -3,6 +3,7 @@ using GData.DTOs;
 using GData.Entity;
 using GData.Enums;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace GData.Repositories.Users
 {
@@ -13,14 +14,18 @@ namespace GData.Repositories.Users
             throw new NotImplementedException();
         }
 
-        public Task<User> GetUserById(Guid Id)
+        public async Task<User> GetUserById(Guid Id)
         {
-            throw new NotImplementedException();
+
+            return await dbContext.Users.FirstOrDefaultAsync(u => u.Id == Id);
+
         }
 
-        public Task<User> GetUserByUsername(string username)
+        public async Task<User> GetUserByUsername(string username)
         {
-            throw new NotImplementedException();
+
+            return await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
+            
         }
 
         public Task<User> Login(string username, string password)
@@ -60,12 +65,36 @@ namespace GData.Repositories.Users
 
         }
 
-        public Task<User> VerifyEmail()
+        public async Task<bool> VerifyAccount(User user,int code)
         {
-            throw new NotImplementedException();
-        }
 
-        
+            if(user!=null)
+            {
+
+                if (code == user.VerificationCode)
+                {
+
+                    user.IsEmailConfirmed = true;
+                    await dbContext.SaveChangesAsync();
+                    return true;
+                }
+
+                else
+                {
+
+                    return false;
+
+                }
+
+            }
+            else
+            {
+
+                return false;
+
+            }
+
+        }
 
     }
 }
