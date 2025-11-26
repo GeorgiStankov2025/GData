@@ -55,6 +55,8 @@ namespace GData.Repositories.Users
             user.VerificationCode = Random.Shared.Next(100000, 999999);
             user.DateCreated=DateTime.UtcNow;
 
+            SendEmailRegistration(user);
+
             await dbContext.AddAsync(user);
             await dbContext.SaveChangesAsync();
 
@@ -67,7 +69,7 @@ namespace GData.Repositories.Users
             throw new NotImplementedException();
         }
 
-        public async void SendEmail(User user)
+        private async void SendEmailRegistration(User user)
         {
 
             var email = new MimeMessage();
