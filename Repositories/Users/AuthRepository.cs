@@ -2,11 +2,7 @@
 using GData.DTOs;
 using GData.Entity;
 using GData.Enums;
-using MailKit;
-using MailKit.Net.Smtp;
-using MailKit.Security;
 using Microsoft.AspNetCore.Identity;
-using MimeKit;
 
 namespace GData.Repositories.Users
 {
@@ -55,7 +51,7 @@ namespace GData.Repositories.Users
             user.VerificationCode = Random.Shared.Next(100000, 999999);
             user.DateCreated=DateTime.UtcNow;
 
-            SendEmailRegistration(user);
+            
 
             await dbContext.AddAsync(user);
             await dbContext.SaveChangesAsync();
@@ -69,30 +65,7 @@ namespace GData.Repositories.Users
             throw new NotImplementedException();
         }
 
-        private async void SendEmailRegistration(User user)
-        {
-
-            var email = new MimeMessage();
-
-            email.From.Add(MailboxAddress.Parse("bitproductions2024@gmail.com"));
-            email.To.Add(MailboxAddress.Parse(user.Email));
-            email.Subject = $"GDataRegistration ";
-            email.Body = new TextPart(MimeKit.Text.TextFormat.Html)
-            {
-
-                Text = $"Hi, {user.Username}! Wellcome to GData. You have successfully registered to our website. You can activate your account using the code: {user.VerificationCode} \n\n\n GData Team"
-
-            };
-
-            using var smtp = new SmtpClient();
-
-            await smtp.ConnectAsync("smtp.gmail.com", 465, SecureSocketOptions.SslOnConnect);
-            await smtp.AuthenticateAsync("bitproductions2024@gmail.com", "unbv xvlo wrvs vgnm");
-            await smtp.SendAsync(email);
-            await smtp.DisconnectAsync(true);
-
-
-        }
+        
 
     }
 }
