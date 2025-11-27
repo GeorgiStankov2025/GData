@@ -14,9 +14,17 @@ namespace GData.Repositories.Users
 {
     public class AuthRepository(GDataDbContext dbContext) : IAuthRepository
     {
-        public Task<User> ChangePassword(User user)
+        public async Task<User> ChangePassword(string password,User user)
         {
-            throw new NotImplementedException();
+
+            PasswordHasher<User> passwordHasher= new PasswordHasher<User>();
+
+            user.PasswordHash = passwordHasher.HashPassword(user, password);
+
+            await dbContext.SaveChangesAsync();
+
+            return user;
+
         }
 
         public async Task<User> GetUserById(Guid Id)

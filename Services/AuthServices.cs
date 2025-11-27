@@ -193,5 +193,85 @@ namespace GData.Services
             return await CreateJwtToken(user);
 
         }
+
+        public async Task<User> ChangePasswordService(ChangePasswordDTO request)
+        {
+            
+            var user=await authRepository.GetUserByUsername(request.Username);
+
+            PasswordHasher<User> passwordHasher = new PasswordHasher<User>();
+
+            if(request.Username is null || request.Username==string.Empty)
+            {
+
+                return null;
+
+            }
+
+            if (request.Password is null || request.Password == string.Empty)
+            {
+
+                return null;
+
+            }
+
+            if (request.NewPassword is null || request.NewPassword == string.Empty)
+            {
+
+                return null;
+
+            }
+
+            if (request.NewPassword.Length<8)
+            {
+
+                return null;
+
+            }
+
+            if (request.Email is null || request.Email == string.Empty)
+            {
+
+                return null;
+            
+            }
+
+            if(user is null)
+            {
+
+                return null;
+
+            }
+
+            if(request.Username!=user.Username|| request.Email!=user.Email|| passwordHasher.VerifyHashedPassword(user,user.PasswordHash,request.Password )!= PasswordVerificationResult.Success)
+            {
+
+                return null;
+
+            }
+
+            if (request.Username != user.Username && request.Email != user.Email && passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password) != PasswordVerificationResult.Success)
+            {
+
+                return null;
+
+            }
+
+            else if(passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.NewPassword) == PasswordVerificationResult.Success)
+            {
+
+                return null;
+
+            }
+            else
+            {
+
+                await authRepository.ChangePassword(request.NewPassword, user);
+
+                return user;
+
+            }    
+
+        }
     }
 }

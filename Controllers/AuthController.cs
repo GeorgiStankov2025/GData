@@ -118,5 +118,26 @@ namespace GData.Controllers
             return Ok("You are authenticated!");
         }
 
+        [Authorize]
+        [HttpPatch("change-Password")]
+        public async Task<ActionResult<User>> ChangePassword(ChangePasswordDTO request)
+        {
+
+            var result=await authServices.ChangePasswordService(request);
+
+            if(result is not null)
+            {
+
+                return Ok(result);  
+
+            }
+            else
+            {
+
+                return BadRequest();
+
+            }
+
+        }
     }
 }
