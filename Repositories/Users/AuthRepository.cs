@@ -4,6 +4,11 @@ using GData.Entity;
 using GData.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace GData.Repositories.Users
 {
@@ -28,11 +33,6 @@ namespace GData.Repositories.Users
             
         }
 
-        public Task<User> Login(string username, string password)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task<User> Logout()
         {
             throw new NotImplementedException();
@@ -55,8 +55,6 @@ namespace GData.Repositories.Users
             user.UserRole = UserRole.User;
             user.VerificationCode = Random.Shared.Next(100000, 999999);
             user.DateCreated=DateTime.UtcNow;
-
-            
 
             await dbContext.AddAsync(user);
             await dbContext.SaveChangesAsync();

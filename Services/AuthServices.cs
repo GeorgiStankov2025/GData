@@ -3,15 +3,21 @@ using GData.Entity;
 using GData.Repositories.Users;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using MimeKit;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
+using System.Security.Claims;
+using System.Text;
 
 
 
 
 namespace GData.Services
 {
-    public class AuthServices(IAuthRepository authRepository) : IAuthServices
+    public class AuthServices(IAuthRepository authRepository, IConfiguration configuration) : IAuthServices
     {
         private async void SendEmailRegistration(User user)
         {
@@ -58,7 +64,7 @@ namespace GData.Services
                     return null;
                 }
             }
-            catch(FormatException ex)
+            catch (FormatException ex)
             {
 
                 return null;
@@ -66,7 +72,7 @@ namespace GData.Services
             }
         }
 
-        public async Task<bool> VerifyAccountService(Guid Id,int code)
+        public async Task<bool> VerifyAccountService(Guid Id, int code)
         {
 
             var user = await authRepository.GetUserById(Id);
@@ -90,9 +96,9 @@ namespace GData.Services
 
         public async Task<User> GetUserByUsernameService(string username)
         {
-            
+
             var result = await authRepository.GetUserByUsername(username);
-            if(result is not null)
+            if (result is not null)
             {
 
                 return result;
@@ -123,6 +129,68 @@ namespace GData.Services
                 return null;
 
             }
+
+        }
+
+        private string CreateJWTToken(User user)
+        {
+
+            var claims = new List<Claim>()
+            {
+
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.UserRole.ToString())
+
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("AppSettings:Token")));
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
+
+            var tokenDescriptor = new JwtSecurityToken(
+
+                issuer: configuration.GetValue<string>("AppSettings:Issuer"),
+                audience: configuration.GetValue<string>("AppSettings:Audience"),
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(5),
+                signingCredentials: creds
+
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
+
+        }
+
+        private async Task<TokenDTO> CreateJwtToken(User user)
+        {
+
+           return new TokenDTO { AccessToken = CreateJWTToken(user) };
+            
+        }
+
+        public async Task<TokenDTO> LoginService(LoginUserDTO request)
+        {
+
+            var user = await authRepository.GetUserByUsername(request.Username);
+
+            var passwordHasher = new PasswordHasher<User>();
+
+            if (user is null)
+            {
+
+                return null;
+
+            }
+            if (passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password)
+                == PasswordVerificationResult.Failed)
+            {
+
+                return null;
+
+            }
+
+            return await CreateJwtToken(user);
 
         }
     }

@@ -1,6 +1,7 @@
 ﻿using GData.DTOs;
 using GData.Entity;
 using GData.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -90,6 +91,31 @@ namespace GData.Controllers
                 return BadRequest("Wrong code or user!");
 
             }
+        }
+
+        [HttpPost("login-User")]
+
+        public async Task<ActionResult<TokenDTO>> Login(LoginUserDTO request)
+        {
+
+            var result= await authServices.LoginService(request);
+
+            if(result != null)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return NotFound();
+            }
+
+        }
+
+        [Authorize]
+        [HttpGet("authenticated-probe")]
+        public async Task<ActionResult<User>> AuthenticatedEndpoint()
+        {
+            return Ok("You are authenticated!");
         }
 
     }

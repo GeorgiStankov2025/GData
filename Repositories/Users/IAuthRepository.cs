@@ -6,7 +6,6 @@ namespace GData.Repositories.Users
     public interface IAuthRepository
     {
         public Task<User> Register(RegisterUserDTO request);
-        public Task<User> Login(string username, string password);
         public Task<User> Logout();
         public Task<User> ChangePassword(User user);
         public Task<bool> VerifyAccount(User user, int code);
