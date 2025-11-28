@@ -11,6 +11,7 @@ namespace GData.Services
         public Task<User> ChangePasswordService(ChangePasswordDTO request);
         public Task<User> GetUserByUsernameService(string username);
         public Task<User> GetUserByIdService(Guid Id);
+        public Task<List<User>> GetAllUsersService();
 
     }
 

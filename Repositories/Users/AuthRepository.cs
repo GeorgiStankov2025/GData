@@ -21,9 +21,18 @@ namespace GData.Repositories.Users
 
             user.PasswordHash = passwordHasher.HashPassword(user, password);
 
+            user.DateModified = DateTime.UtcNow;
+
             await dbContext.SaveChangesAsync();
 
             return user;
+
+        }
+
+        public async Task<List<User>> GetAllUsers()
+        {
+
+            return await dbContext.Users.ToListAsync();
 
         }
 
@@ -81,6 +90,8 @@ namespace GData.Repositories.Users
                 {
 
                     user.IsEmailConfirmed = true;
+                    user.VerificationCode = 0;
+                    user.DateModified = DateTime.UtcNow;
                     await dbContext.SaveChangesAsync();
                     return true;
                 }

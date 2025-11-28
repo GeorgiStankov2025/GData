@@ -138,5 +138,12 @@ namespace GData.Controllers
             }
 
         }
+        [HttpGet("get-All-Users")]
+        public async Task<ActionResult<List<User>>> GetAllUsers()
+        {
+
+            return Ok(await authServices.GetAllUsersService());
+
+        }
     }
 }

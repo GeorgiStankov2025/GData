@@ -45,11 +45,63 @@ namespace GData.Services
 
         public async Task<User> RegisterService(RegisterUserDTO request)
         {
+
             try
             {
-                if (request != null && request.Username != string.Empty && request.Password != string.Empty &&
-                request.Firstname != string.Empty && request.Lastname != string.Empty &&
-                request.Email != string.Empty && request.Username.Length >= 8 && request.Password.Length >= 8 && request.Firstname.Length >= 2 && request.Lastname.Length >= 2)
+
+                List<User> users = await GetAllUsersService();
+
+                if (request == null)
+                {
+
+                    return null;
+
+                }
+
+                foreach(var user in users)
+                {
+
+                    if(request.Username==user.Username)
+                    {
+
+                        return null;
+
+                    }
+
+                    if(request.Email==user.Email)
+                    {
+
+                        return null;
+
+                    }
+
+                }
+
+                if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Firstname) || string.IsNullOrWhiteSpace(request.Lastname))
+                {
+
+                    return null;
+
+                }
+                if (string.IsNullOrWhiteSpace(request.Email) && string.IsNullOrWhiteSpace(request.Username) && string.IsNullOrWhiteSpace(request.Password) && string.IsNullOrWhiteSpace(request.Username) && string.IsNullOrWhiteSpace(request.Firstname) || string.IsNullOrWhiteSpace(request.Lastname))
+                {
+
+                    return null;
+
+                }
+                if (request.Username.Length<8||request.Password.Length<8||request.Firstname.Length<2||request.Lastname.Length<2)
+                {
+
+                    return null;
+
+                }
+                if (request.Username.Length < 8 && request.Password.Length < 8 && request.Firstname.Length < 2 && request.Lastname.Length < 2)
+                {
+
+                    return null;
+
+                }
+                else
                 {
 
                     _ = new System.Net.Mail.MailAddress(request.Email);
@@ -58,10 +110,6 @@ namespace GData.Services
                     SendEmailRegistration(result);
                     return result;
 
-                }
-                else
-                {
-                    return null;
                 }
             }
             catch (FormatException ex)
@@ -97,17 +145,28 @@ namespace GData.Services
         public async Task<User> GetUserByUsernameService(string username)
         {
 
-            var result = await authRepository.GetUserByUsername(username);
-            if (result is not null)
+            if (string.IsNullOrWhiteSpace(username))
             {
 
-                return result;
+                return null;
 
             }
             else
             {
+                var result = await authRepository.GetUserByUsername(username);
 
-                return null;
+                if (result is not null)
+                {
+
+                    return result;
+
+                }
+                else
+                {
+
+                    return null;
+
+                }
 
             }
 
@@ -115,21 +174,29 @@ namespace GData.Services
 
         public async Task<User> GetUserByIdService(Guid Id)
         {
-
-            var result = await authRepository.GetUserById(Id);
-            if (result is not null)
-            {
-
-                return result;
-
-            }
-            else
+            if (Id == Guid.Empty)
             {
 
                 return null;
 
             }
+            else
+            {
+                var result = await authRepository.GetUserById(Id);
+                if (result is not null)
+                {
 
+                    return result;
+
+                }
+                else
+                {
+
+                    return null;
+
+                }
+
+            }
         }
 
         private string CreateJWTToken(User user)
@@ -201,21 +268,21 @@ namespace GData.Services
 
             PasswordHasher<User> passwordHasher = new PasswordHasher<User>();
 
-            if(request.Username is null || request.Username==string.Empty)
+            if(string.IsNullOrWhiteSpace(request.Username))
             {
 
                 return null;
 
             }
 
-            if (request.Password is null || request.Password == string.Empty)
+            if (string.IsNullOrWhiteSpace(request.Password))
             {
 
                 return null;
 
             }
 
-            if (request.NewPassword is null || request.NewPassword == string.Empty)
+            if (string.IsNullOrWhiteSpace(request.NewPassword))
             {
 
                 return null;
@@ -229,7 +296,7 @@ namespace GData.Services
 
             }
 
-            if (request.Email is null || request.Email == string.Empty)
+            if (string.IsNullOrWhiteSpace(request.Email))
             {
 
                 return null;
@@ -263,6 +330,14 @@ namespace GData.Services
                 return null;
 
             }
+
+            if(user.IsEmailConfirmed==false)
+            {
+
+                return null;
+
+            }
+
             else
             {
 
@@ -271,6 +346,13 @@ namespace GData.Services
                 return user;
 
             }    
+
+        }
+
+        public async Task<List<User>> GetAllUsersService()
+        {
+
+            return await authRepository.GetAllUsers();
 
         }
     }

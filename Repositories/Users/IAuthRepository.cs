@@ -11,6 +11,7 @@ namespace GData.Repositories.Users
         public Task<bool> VerifyAccount(User user, int code);
         public Task<User> GetUserById(Guid Id);
         public Task<User> GetUserByUsername(string username);
+        public Task<List<User>> GetAllUsers();
 
     }
 }
