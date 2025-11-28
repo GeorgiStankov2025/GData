@@ -1,15 +1,18 @@
 ﻿using GData.DTOs;
 using GData.Entity;
+using GData.Exceptions;
 using GData.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
 
 namespace GData.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController(IAuthServices authServices) : ControllerBase
+    public class AuthController(IAuthServices authServices, ILogger<AuthController> logger) : ControllerBase
     {
 
         [HttpPost("register-User")]
@@ -94,18 +97,60 @@ namespace GData.Controllers
         }
 
         [HttpPost("login-User")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<TokenDTO>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type=typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<TokenDTO>> Login(LoginUserDTO request)
         {
-
-            var result= await authServices.LoginService(request);
-
-            if(result != null)
+            try
             {
+
+                var result = await authServices.LoginService(request);
                 return Ok(result);
+
             }
-            else
+            catch(ArgumentNullException ex)
             {
-                return NotFound();
+
+                logger.LogError(ex, $"Not found!");
+                return Problem(
+
+                    detail: $"User not found",
+                    title: "Not Found",
+                    statusCode: StatusCodes.Status404NotFound,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch(FormatException formatException)
+            {
+
+                logger.LogError(formatException, $"Bad Request");
+                return Problem(
+
+                    detail: "Invalid login data!",
+                    title: "Bad Request",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch (Exception ex)
+            {
+
+                logger.LogError(ex, $"An unexpected error occured");
+                return Problem(
+
+                    detail: "An unexpected error occured while proccessing your request",
+                    title: "Internal Server Error",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
             }
 
         }

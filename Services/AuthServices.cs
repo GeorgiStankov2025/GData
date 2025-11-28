@@ -1,5 +1,6 @@
 ﻿using GData.DTOs;
 using GData.Entity;
+using GData.Exceptions;
 using GData.Repositories.Users;
 using MailKit.Net.Smtp;
 using MailKit.Security;
@@ -17,7 +18,7 @@ using System.Text;
 
 namespace GData.Services
 {
-    public class AuthServices(IAuthRepository authRepository, IConfiguration configuration) : IAuthServices
+    public class AuthServices(IAuthRepository authRepository, IConfiguration configuration, UserExceptionList exceptionList) : IAuthServices
     {
         private async void SendEmailRegistration(User user)
         {
@@ -246,14 +247,14 @@ namespace GData.Services
             if (user is null)
             {
 
-                return null;
+                return await exceptionList.UserDoesNotExist();
 
             }
             if (passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password)
                 == PasswordVerificationResult.Failed)
             {
 
-                return null;
+                return await exceptionList.InvalidLoginData();
 
             }
 
