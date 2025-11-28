@@ -94,7 +94,6 @@ namespace GData.Controllers
         }
 
         [HttpPost("login-User")]
-
         public async Task<ActionResult<TokenDTO>> Login(LoginUserDTO request)
         {
 
