@@ -143,7 +143,7 @@ namespace GData.Services
             if (string.IsNullOrWhiteSpace(username))
             {
 
-                return null;
+                return await exceptionList.NoRequestUsername();
 
             }
             else
@@ -159,7 +159,7 @@ namespace GData.Services
                 else
                 {
 
-                    return null;
+                    return await exceptionList.UserNotFoundWithUsername();
 
                 }
 
@@ -172,7 +172,7 @@ namespace GData.Services
             if (Id == Guid.Empty)
             {
 
-                return null;
+                return await exceptionList.NoRequestId();
 
             }
             else
@@ -187,7 +187,7 @@ namespace GData.Services
                 else
                 {
 
-                    return null;
+                    return await exceptionList.UserNotFoundWithId();
 
                 }
 

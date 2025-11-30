@@ -70,5 +70,38 @@ namespace GData.Exceptions
             throw new FormatException("The email address you provided is invalid or does not exist");
 
         }
+
+        //GetUserByUsername Errors
+
+        public Task<User> NoRequestUsername()
+        {
+
+            throw new ArgumentNullException("No username has been provided");
+
+        }
+
+        public Task<User> UserNotFoundWithUsername()
+        {
+
+            throw new FormatException("No user was found with this username");
+
+        }
+
+        //GetUserById Errors
+
+        public Task<User> NoRequestId()
+        {
+
+            throw new ArgumentNullException("No Id has been provided");
+
+        }
+
+        public Task<User> UserNotFoundWithId()
+        {
+
+            throw new FormatException("No user was found with this Id");
+
+        }
+
     }
 }

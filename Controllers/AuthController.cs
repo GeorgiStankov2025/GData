@@ -16,7 +16,7 @@ namespace GData.Controllers
     {
 
         [HttpPost("register-User")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<TokenDTO>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<User>> Register(RegisterUserDTO request)
@@ -59,43 +59,119 @@ namespace GData.Controllers
         }
 
         [HttpGet("get-User-By-Username")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<User>> GetUserByUsername(string username)
         {
 
-            var result = await authServices.GetUserByUsernameService(username);
-
-            if(result!=null)
+            try
             {
 
+                var result = await authServices.GetUserByUsernameService(username);
                 return Ok(result);
 
             }
-            else
+            catch (ArgumentNullException nullException)
             {
 
-                return NotFound();
+                logger.LogError(nullException, $"Bad Request");
+                return Problem(
 
-            }    
+                    detail: nullException.Message,
+                    title: "Bad Request",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch (FormatException formatException)
+            {
+
+                logger.LogError(formatException, $"Not found");
+                return Problem(
+
+                    detail: formatException.Message,
+                    title: "Not Found!",
+                    statusCode: StatusCodes.Status404NotFound,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch (Exception ex)
+            {
+
+                logger.LogError(ex, $"An unexpected error occured");
+                return Problem(
+
+                    detail: ex.Message,
+                    title: "Internal Server Error",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+
         }
 
         [HttpGet("get-User-By-Id{Id}")]
         public async Task<ActionResult<User>> GetUserById(Guid Id)
         {
 
-            var result = await authServices.GetUserByIdService(Id);
-
-            if (result != null)
+            try
             {
 
+                var result = await authServices.GetUserByIdService(Id);
                 return Ok(result);
 
             }
-            else
+            catch (ArgumentNullException nullException)
             {
 
-                return NotFound();
+                logger.LogError(nullException, $"Bad Request");
+                return Problem(
+
+                    detail: nullException.Message,
+                    title: "Bad Request",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: HttpContext.TraceIdentifier
+
+                );
 
             }
+            catch (FormatException formatException)
+            {
+
+                logger.LogError(formatException, $"Not found");
+                return Problem(
+
+                    detail: formatException.Message,
+                    title: "Not Found!",
+                    statusCode: StatusCodes.Status404NotFound,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch (Exception ex)
+            {
+
+                logger.LogError(ex, $"An unexpected error occured");
+                return Problem(
+
+                    detail: ex.Message,
+                    title: "Internal Server Error",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+
         }
 
         [HttpPost("verify-Account")]
@@ -119,7 +195,7 @@ namespace GData.Controllers
         }
 
         [HttpPost("login-User")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<TokenDTO>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenDTO))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type=typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
