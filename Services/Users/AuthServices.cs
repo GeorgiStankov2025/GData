@@ -1,4 +1,4 @@
-﻿using GData.DTOs;
+﻿using GData.DTOs.UserDTO;
 using GData.Entity;
 using GData.Exceptions;
 using GData.Repositories.Users;
@@ -17,7 +17,7 @@ using System.Text;
 
 
 
-namespace GData.Services
+namespace GData.Services.Users
 {
     public class AuthServices(IAuthRepository authRepository, IConfiguration configuration, UserExceptionList exceptionList) : IAuthServices
     {

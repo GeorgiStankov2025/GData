@@ -9,10 +9,19 @@ namespace GData.Data
 
         public DbSet<User> Users => Set<User>();
 
+        public DbSet<Post> Posts => Set<Post>();
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
             optionsBuilder.UseNpgsql("User ID=postgres;Password=Bit_2024;Host=localhost;Port=5432;Database=GDataDb;Pooling=true;Connection Lifetime=30;");
+
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            
+            modelBuilder.Entity<Post>().HasOne(p=>p.Owner).WithMany(u=>u.UserPosts).HasPrincipalKey(p=>p.Id).HasForeignKey(p=>p.OwnerId);
 
         }
 

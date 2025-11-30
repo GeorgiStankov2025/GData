@@ -1,7 +1,9 @@
 using GData.Data;
 using GData.Exceptions;
+using GData.Repositories.Posts;
 using GData.Repositories.Users;
-using GData.Services;
+using GData.Services.Posts;
+using GData.Services.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +24,8 @@ builder.Services.AddDbContext<GDataDbContext>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthServices, AuthServices>();
 builder.Services.AddScoped<UserExceptionList>();
+builder.Services.AddScoped<IPostsRepository, PostsRepository>();
+builder.Services.AddScoped<IPostsService,PostsService>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

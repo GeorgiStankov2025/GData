@@ -1,4 +1,5 @@
 ﻿using GData.Enums;
+using System.Text.Json.Serialization;
 
 namespace GData.Entity
 {
@@ -25,6 +26,9 @@ namespace GData.Entity
         public DateTime DateCreated { get; set; }
 
         public DateTime DateModified { get; set; }
+
+        [JsonIgnore]
+        public List<Post>? UserPosts { get; set; }
 
     }
 }

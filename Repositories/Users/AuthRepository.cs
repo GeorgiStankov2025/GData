@@ -1,5 +1,5 @@
 ﻿using GData.Data;
-using GData.DTOs;
+using GData.DTOs.UserDTO;
 using GData.Entity;
 using GData.Enums;
 using Microsoft.AspNetCore.Identity;

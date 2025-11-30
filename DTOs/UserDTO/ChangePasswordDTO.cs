@@ -1,4 +1,4 @@
-﻿namespace GData.DTOs
+﻿namespace GData.DTOs.UserDTO
 {
     public class ChangePasswordDTO
     {

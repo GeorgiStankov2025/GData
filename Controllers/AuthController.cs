@@ -1,7 +1,7 @@
-﻿using GData.DTOs;
+﻿using GData.DTOs.UserDTO;
 using GData.Entity;
 using GData.Exceptions;
-using GData.Services;
+using GData.Services.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

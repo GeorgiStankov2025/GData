@@ -1,4 +1,4 @@
-﻿using GData.DTOs;
+﻿using GData.DTOs.UserDTO;
 using GData.Entity;
 
 namespace GData.Exceptions
