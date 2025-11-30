@@ -346,5 +346,30 @@ namespace GData.Services
             return await authRepository.GetAllUsers();
 
         }
+
+        public async Task<User> ResendVerificationCodeService(Guid Id)
+        {
+ 
+            var user=await GetUserByIdService(Id);
+
+            if (user.IsEmailConfirmed == false)
+            {
+
+                var result = await authRepository.ResendVerificationCode(user);
+
+                SendEmailRegistration(user);
+
+                return result;
+
+            }
+            else
+            {
+
+                return await exceptionList.AccountIsVerified();
+
+            }    
+
+
+        }
     }
 }

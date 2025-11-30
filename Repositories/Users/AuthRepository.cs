@@ -80,6 +80,16 @@ namespace GData.Repositories.Users
 
         }
 
+        public async Task<User> ResendVerificationCode(User user)
+        {
+
+            user.VerificationCode = Random.Shared.Next(100000, 999999);
+            user.DateModified = DateTime.UtcNow;
+            await dbContext.SaveChangesAsync();
+            return user;
+
+        }
+
         public async Task<bool> VerifyAccount(User user,int code)
         {
 

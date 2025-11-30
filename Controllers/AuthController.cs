@@ -357,5 +357,34 @@ namespace GData.Controllers
             
             }
         }
+
+        [HttpPatch("resend-User-Verification-code{Id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+        public async Task<ActionResult<User>> ResendVerificationCode(Guid Id)
+        {
+            try
+            {
+                var result = await authServices.ResendVerificationCodeService(Id);
+                return Ok(result);
+            }
+            catch (FormatException formatException)
+            {
+
+                logger.LogError(formatException, $"Bad request");
+
+                return Problem(
+
+                    detail: formatException.Message,
+                    title: "Bad request!",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+        }
+
     }
 }

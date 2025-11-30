@@ -146,6 +146,15 @@ namespace GData.Exceptions
 
         }
 
+        //Resend Verification code errors
+
+        public Task<User> AccountIsVerified()
+        {
+
+            throw new FormatException("Account is already verified");
+
+        }
+
 
     }
 }
