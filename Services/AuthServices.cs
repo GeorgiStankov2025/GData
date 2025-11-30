@@ -47,78 +47,72 @@ namespace GData.Services
         public async Task<User> RegisterService(RegisterUserDTO request)
         {
 
-            try
+            
+                
+            if(_ = new System.Net.Mail.MailAddress(request.Email) is not System.Net.Mail.MailAddress)
             {
 
-                List<User> users = await GetAllUsersService();
+                return await exceptionList.InvalidEmail();
 
-                if (request == null)
-                {
-
-                    return null;
-
-                }
-
-                foreach(var user in users)
-                {
-
-                    if(request.Username==user.Username)
-                    {
-
-                        return null;
-
-                    }
-
-                    if(request.Email==user.Email)
-                    {
-
-                        return null;
-
-                    }
-
-                }
-
-                if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Firstname) || string.IsNullOrWhiteSpace(request.Lastname))
-                {
-
-                    return null;
-
-                }
-                if (string.IsNullOrWhiteSpace(request.Email) && string.IsNullOrWhiteSpace(request.Username) && string.IsNullOrWhiteSpace(request.Password) && string.IsNullOrWhiteSpace(request.Username) && string.IsNullOrWhiteSpace(request.Firstname) || string.IsNullOrWhiteSpace(request.Lastname))
-                {
-
-                    return null;
-
-                }
-                if (request.Username.Length<8||request.Password.Length<8||request.Firstname.Length<2||request.Lastname.Length<2)
-                {
-
-                    return null;
-
-                }
-                if (request.Username.Length < 8 && request.Password.Length < 8 && request.Firstname.Length < 2 && request.Lastname.Length < 2)
-                {
-
-                    return null;
-
-                }
-                else
-                {
-
-                    _ = new System.Net.Mail.MailAddress(request.Email);
-
-                    var result = await authRepository.Register(request);
-                    SendEmailRegistration(result);
-                    return result;
-
-                }
             }
-            catch (FormatException ex)
+
+            List<User> users = await GetAllUsersService();
+
+            if (request == null)
             {
 
-                return null;
+               return await exceptionList.ErrorProcessingRequest();
 
             }
+
+            foreach(var user in users)
+            {
+
+               if(request.Username==user.Username)
+               {
+
+                   return await exceptionList.UsernameAlreadyExists();
+
+               }
+
+               if(request.Email==user.Email)
+               {
+
+                  return await exceptionList.EmailAlreadyExists();
+
+               }
+
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Firstname) || string.IsNullOrWhiteSpace(request.Lastname))
+            {
+
+               return await exceptionList.FillAllBoxes();
+
+            }
+            if (string.IsNullOrWhiteSpace(request.Email) && string.IsNullOrWhiteSpace(request.Username) && string.IsNullOrWhiteSpace(request.Password) && string.IsNullOrWhiteSpace(request.Username) && string.IsNullOrWhiteSpace(request.Firstname) || string.IsNullOrWhiteSpace(request.Lastname))
+            {
+
+               return await exceptionList.FillAllBoxes();
+
+            }
+            if (request.Username.Length<8||request.Password.Length<8||request.Firstname.Length<2||request.Lastname.Length<2)
+            {
+
+               return await exceptionList.InvalidData();
+
+            }
+            if (request.Username.Length < 8 && request.Password.Length < 8 && request.Firstname.Length < 2 && request.Lastname.Length < 2)
+            {
+
+               return await exceptionList.InvalidData();
+            
+            }
+             
+            var result = await authRepository.Register(request);
+            SendEmailRegistration(result);
+            return result;
+            
         }
 
         public async Task<bool> VerifyAccountService(Guid Id, int code)

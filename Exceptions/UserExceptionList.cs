@@ -27,7 +27,48 @@ namespace GData.Exceptions
 
         }
 
+        //Register Errors
 
+        public Task<User> ErrorProcessingRequest()
+        {
 
+            throw new ArgumentNullException("No data submitted in request");
+
+        }
+
+        public Task<User> UsernameAlreadyExists()
+        {
+
+            throw new FormatException("There is already an account with this username");
+
+        }
+
+        public Task<User> EmailAlreadyExists()
+        {
+
+            throw new FormatException("There is already an account with this email");
+
+        }
+
+        public Task<User> FillAllBoxes()
+        {
+
+            throw new FormatException("All fields are required");
+
+        }
+
+        public Task<User> InvalidData()
+        {
+
+            throw new FormatException("The data you submitted is inconsistent! Username and password need to contain at least 8 characters. First name and Last name need to contain at least two charcters");
+
+        }
+
+        public Task<User> InvalidEmail()
+        {
+
+            throw new FormatException("The email address you provided is invalid or does not exist");
+
+        }
     }
 }

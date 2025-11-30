@@ -16,21 +16,43 @@ namespace GData.Controllers
     {
 
         [HttpPost("register-User")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<TokenDTO>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<User>> Register(RegisterUserDTO request)
         {
 
-            var result = await authServices.RegisterService(request);
-
-            if (result is not null)
+            try
+            {
+                var result = await authServices.RegisterService(request);
+                return Ok(result);
+            }
+            catch(FormatException formatException)
             {
 
-                return Ok(result);
+                logger.LogError(formatException, $"Bad Request");
+                return Problem(
+
+                    detail: formatException.Message,
+                    title: "Bad Request",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: HttpContext.TraceIdentifier
+
+                );
 
             }
-            else
+            catch (Exception ex)
             {
 
-                return BadRequest();
+                logger.LogError(ex, $"An unexpected error occured");
+                return Problem(
+
+                    detail: ex.Message,
+                    title: "Internal Server Error",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    instance: HttpContext.TraceIdentifier
+
+                );
 
             }
 
