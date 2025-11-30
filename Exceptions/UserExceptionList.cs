@@ -103,5 +103,49 @@ namespace GData.Exceptions
 
         }
 
+        //ChangePassword Errors
+
+        public Task<User> ErrorProcessingRequestChangePass()
+        {
+
+            throw new ArgumentNullException("No data submitted in request");
+
+        }
+
+        public Task<User> FillAllBoxesChangePass()
+        {
+
+            throw new FormatException("All fields are required");
+
+        }
+
+        public Task<User> InvalidNewPassword()
+        {
+
+            throw new FormatException("The new password needs to have at least 8 characters");
+        }
+
+        public Task<User> SamePassword()
+        {
+
+            throw new FormatException("The new password cannot be the same as the old one");
+
+        }
+
+        public Task<User> EmailNotVerified()
+        {
+
+            throw new FormatException("The submitted email is not verified");
+
+        }
+
+        public Task<User> InvalidUserCredentials()
+        {
+
+            throw new FormatException("Incorrect user credentials");
+
+        }
+
+
     }
 }

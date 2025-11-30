@@ -262,31 +262,100 @@ namespace GData.Controllers
 
         [Authorize]
         [HttpPatch("change-Password")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized,Type=typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+
         public async Task<ActionResult<User>> ChangePassword(ChangePasswordDTO request)
         {
 
-            var result=await authServices.ChangePasswordService(request);
-
-            if(result is not null)
+            try
             {
 
-                return Ok(result);  
+                var result = await authServices.ChangePasswordService(request);
+                return Ok(result);
 
             }
-            else
+
+            catch( UnauthorizedAccessException unauthorizedException)
             {
 
-                return BadRequest();
+                logger.LogError(unauthorizedException, $"Unauthorized access");
+                return Problem(
+
+                    detail: unauthorizedException.Message,
+                    title: "Unauthorized user access",
+                    statusCode: StatusCodes.Status404NotFound,
+                    instance: HttpContext.TraceIdentifier
+
+                );
 
             }
+
+            catch (ArgumentNullException nullException)
+            {
+
+                logger.LogError(nullException, $"Not found");
+                return Problem(
+
+                    detail: nullException.Message,
+                    title: "Not found",
+                    statusCode: StatusCodes.Status404NotFound,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch (FormatException formatException)
+            {
+
+                logger.LogError(formatException, $"Bad request");
+                return Problem(
+
+                    detail: formatException.Message,
+                    title: "Bad request!",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch (Exception ex)
+            {
+
+                logger.LogError(ex, $"An unexpected error occured");
+                return Problem(
+
+                    detail: ex.Message,
+                    title: "Internal Server Error",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+
 
         }
         [HttpGet("get-All-Users")]
         public async Task<ActionResult<List<User>>> GetAllUsers()
         {
 
-            return Ok(await authServices.GetAllUsersService());
+            var result = await authServices.GetAllUsersService();
 
+            if (result.Count < 1)
+            {
+
+                return NoContent();
+
+            }
+            else
+            {
+            
+                return Ok(result);
+            
+            }
         }
     }
 }

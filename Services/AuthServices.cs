@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using MimeKit;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 using System.Text;
 
@@ -266,81 +267,76 @@ namespace GData.Services
             if(string.IsNullOrWhiteSpace(request.Username))
             {
 
-                return null;
+                return await exceptionList.FillAllBoxesChangePass();
 
             }
 
             if (string.IsNullOrWhiteSpace(request.Password))
             {
 
-                return null;
+                return await exceptionList.FillAllBoxesChangePass();
 
             }
 
             if (string.IsNullOrWhiteSpace(request.NewPassword))
             {
 
-                return null;
+                return await exceptionList.FillAllBoxesChangePass();
 
             }
 
             if (request.NewPassword.Length<8)
             {
 
-                return null;
+                return await exceptionList.InvalidNewPassword();
 
             }
 
             if (string.IsNullOrWhiteSpace(request.Email))
             {
 
-                return null;
-            
+                return await exceptionList.FillAllBoxesChangePass();
+
             }
 
             if(user is null)
             {
 
-                return null;
+                return await exceptionList.ErrorProcessingRequestChangePass();
 
             }
 
             if(request.Username!=user.Username|| request.Email!=user.Email|| passwordHasher.VerifyHashedPassword(user,user.PasswordHash,request.Password )!= PasswordVerificationResult.Success)
             {
 
-                return null;
+                return await exceptionList.InvalidUserCredentials();
 
             }
 
             if (request.Username != user.Username && request.Email != user.Email && passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password) != PasswordVerificationResult.Success)
             {
 
-                return null;
+                return await exceptionList.InvalidUserCredentials();
 
             }
 
             else if(passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.NewPassword) == PasswordVerificationResult.Success)
             {
 
-                return null;
+                return await exceptionList.SamePassword();
 
             }
 
             if(user.IsEmailConfirmed==false)
             {
 
-                return null;
+                return await exceptionList.EmailNotVerified();
 
             }
 
-            else
-            {
+            await authRepository.ChangePassword(request.NewPassword, user);
 
-                await authRepository.ChangePassword(request.NewPassword, user);
-
-                return user;
-
-            }    
+            return user;
 
         }
 
