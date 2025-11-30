@@ -257,7 +257,7 @@ namespace GData.Services
                 return await exceptionList.InvalidLoginData();
 
             }
-
+            
             return await CreateJwtToken(user);
 
         }

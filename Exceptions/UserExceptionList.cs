@@ -5,7 +5,8 @@ namespace GData.Exceptions
 {
     public class UserExceptionList
     {
-
+        
+        //Login Errors
         public Task<TokenDTO> InvalidLoginData()
         {
 
@@ -25,6 +26,8 @@ namespace GData.Exceptions
             throw new Exception("An unexpected error occured! Please try again later!");
 
         }
+
+
 
     }
 }

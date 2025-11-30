@@ -113,10 +113,10 @@ namespace GData.Controllers
             catch(ArgumentNullException ex)
             {
 
-                logger.LogError(ex, $"Not found!");
+                logger.LogError(ex, $"User {request.Username} was not found!");
                 return Problem(
 
-                    detail: $"User not found",
+                    detail: ex.Message,
                     title: "Not Found",
                     statusCode: StatusCodes.Status404NotFound,
                     instance: HttpContext.TraceIdentifier
@@ -130,7 +130,7 @@ namespace GData.Controllers
                 logger.LogError(formatException, $"Bad Request");
                 return Problem(
 
-                    detail: "Invalid login data!",
+                    detail: formatException.Message,
                     title: "Bad Request",
                     statusCode: StatusCodes.Status400BadRequest,
                     instance: HttpContext.TraceIdentifier
@@ -144,7 +144,7 @@ namespace GData.Controllers
                 logger.LogError(ex, $"An unexpected error occured");
                 return Problem(
 
-                    detail: "An unexpected error occured while proccessing your request",
+                    detail: ex.Message,
                     title: "Internal Server Error",
                     statusCode: StatusCodes.Status500InternalServerError,
                     instance: HttpContext.TraceIdentifier
