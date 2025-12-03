@@ -119,6 +119,10 @@ namespace GData.Controllers
         }
 
         [HttpGet("get-User-By-Id{Id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<User>> GetUserById(Guid Id)
         {
 
@@ -286,7 +290,7 @@ namespace GData.Controllers
 
                     detail: unauthorizedException.Message,
                     title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status404NotFound,
+                    statusCode: StatusCodes.Status401Unauthorized,
                     instance: HttpContext.TraceIdentifier
 
                 );

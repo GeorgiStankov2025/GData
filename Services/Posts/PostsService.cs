@@ -1,16 +1,44 @@
 ﻿using GData.DTOs.PostDTO;
 using GData.Entity;
+using GData.Exceptions;
 using GData.Repositories.Posts;
 using GData.Services.Users;
 
 namespace GData.Services.Posts
 {
-    public class PostsService(IPostsRepository postsRepository,IAuthServices authServices) : IPostsService
+    public class PostsService(IPostsRepository postsRepository,IAuthServices authServices,PostsExceptionList postsExceptionList) : IPostsService
     {
         public async Task<Post> CreatePostService(Guid OwnerId, PostDTO request)
         {
 
             User owner = await authServices.GetUserByIdService(OwnerId);
+
+            if (owner == null)
+            {
+
+                return await postsExceptionList.CreatePostOwnerDoesNotExist();
+
+            }
+
+            if(string.IsNullOrWhiteSpace(request.Title))
+            {
+
+                return await postsExceptionList.NoTitleHasBeenProvidedForPost();
+
+            }
+
+            if(request.Title.Length<3)
+            {
+
+                return await postsExceptionList.TitleNeedsToHaveMoreThanThreeChars();
+
+            }
+            if(owner.IsEmailConfirmed==false)
+            {
+
+                return await postsExceptionList.UnverifiedOwner();
+
+            }
 
             var post= new Post()
             {
@@ -25,9 +53,15 @@ namespace GData.Services.Posts
 
         }
 
-        public Task<Post> DeletePostService(Guid Id)
+        public async Task<Post> DeletePostService(Guid Id)
         {
-            throw new NotImplementedException();
+            
+            var post=await postsRepository.GetPostById(Id);
+
+            await postsRepository.DeletePost(post);
+
+            return post;
+
         }
 
         public async Task<List<Post>> GetAllPosts()
@@ -69,10 +103,13 @@ namespace GData.Services.Posts
 
         }
 
-        public async Task<Post> UpdatePostService( PostDTO request)
+        public async Task<Post> UpdatePostService(PostDTO request,Guid Id)
         {
 
-            throw new Exception();
+            var post=await GetPostById(Id);
+            await postsRepository.EditPost(request,post);
+
+            return post;
 
         }
     }

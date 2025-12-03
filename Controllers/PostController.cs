@@ -1,14 +1,16 @@
 ﻿using GData.DTOs.PostDTO;
 using GData.Entity;
 using GData.Services.Posts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace GData.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PostController(IPostsService postsService) : ControllerBase
+    public class PostController(IPostsService postsService, ILogger<PostController> logger) : ControllerBase
     {
 
         [HttpGet("get-Post-By-Id{Id}")]
@@ -38,11 +40,93 @@ namespace GData.Controllers
 
         }
 
+        [Authorize]
         [HttpPost("create-Post{ownerId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<Post>> CreatePost(Guid ownerId, PostDTO request)
         {
+            try
+            {
+                var result = await postsService.CreatePostService(ownerId, request);
+                return Ok(result);
+            }
+            catch(UnauthorizedAccessException unauthorizedException)
+            {
 
-            var result= await postsService.CreatePostService(ownerId, request);
+                logger.LogError(unauthorizedException, $"Unauthorized access");
+                return Problem(
+
+                    detail: unauthorizedException.Message,
+                    title: "Unauthorized user access",
+                    statusCode: StatusCodes.Status401Unauthorized,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+
+            catch (ArgumentNullException nullException)
+            {
+
+                logger.LogError(nullException, $"Bad request");
+                return Problem(
+
+                    detail: nullException.Message,
+                    title: "Bad request!",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch (FormatException formatException)
+            {
+
+                logger.LogError(formatException, $"Bad request");
+                return Problem(
+
+                    detail: formatException.Message,
+                    title: "Bad request!",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+
+            catch (Exception ex)
+            {
+
+                logger.LogError(ex, $"An unexpected error occured");
+                return Problem(
+
+                    detail: ex.Message,
+                    title: "Internal Server Error",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+        }
+
+        [HttpPatch("edit-Post{Id}")]
+        public async Task<ActionResult<Post>> EditPost(Guid Id, PostDTO request)
+        {
+
+            var result = await postsService.UpdatePostService(request,Id);
+            return Ok(result);
+
+        }
+
+        [HttpDelete("delete-Post{Id}")]
+        public async Task<ActionResult<Post>> DeletePost(Guid Id)
+        {
+
+            var result=await postsService.DeletePostService(Id);
             return Ok(result);
 
         }

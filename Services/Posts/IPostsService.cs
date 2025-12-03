@@ -10,6 +10,7 @@ namespace GData.Services.Posts
         public Task<Post> GetPostById(Guid Id);
         public Task<List<Post>> GetAllPosts();
         public Task<List<Post>> GetAllPostsByUser(Guid ownerId);
+        public Task<Post> UpdatePostService(PostDTO request, Guid Id);
         public Task<Post> DeletePostService(Guid Id);
 
     }

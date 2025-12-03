@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GData.Repositories.Posts
 {
-    public class PostsRepository(GDataDbContext dbContext, IAuthServices authServices) : IPostsRepository
+    public class PostsRepository(GDataDbContext dbContext) : IPostsRepository
     {
         public async Task<Post> CreatePost(Post post)
         {
@@ -33,6 +33,7 @@ namespace GData.Repositories.Posts
         {
             
             post.Title = request.Title;
+            post.DateModified = DateTime.UtcNow;
             await dbContext.SaveChangesAsync();
             return post;
 

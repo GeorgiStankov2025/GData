@@ -1,4 +1,5 @@
-﻿using GData.DTOs.UserDTO;
+﻿using GData.DTOs.PostDTO;
+using GData.DTOs.UserDTO;
 using GData.Entity;
 
 namespace GData.Services.Users
@@ -12,7 +13,6 @@ namespace GData.Services.Users
         public Task<User> GetUserByUsernameService(string username);
         public Task<User> GetUserByIdService(Guid Id);
         public Task<User> ResendVerificationCodeService(Guid Id);
-
         public Task<List<User>> GetAllUsersService();
 
     }
