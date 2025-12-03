@@ -14,12 +14,45 @@ namespace GData.Controllers
     {
 
         [HttpGet("get-Post-By-Id{Id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+
         public async Task<ActionResult<Post>> GetPostById(Guid Id)
         {
 
-            var result= await postsService.GetPostById(Id);
-            return Ok(result);
+            try
+            {
+                var result = await postsService.GetPostById(Id);
+                return Ok(result);            
+            }
+            catch (ArgumentNullException nullException)
+            {
 
+                logger.LogError(nullException, $"Not Found!");
+                return Problem(
+
+                    detail: nullException.Message,
+                    title: "Not found!",
+                    statusCode: StatusCodes.Status404NotFound,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch (Exception ex)
+            {
+
+                logger.LogError(ex, $"An unexpected error occured");
+                return Problem(
+
+                    detail: ex.Message,
+                    title: "Internal Server Error",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
         }
 
         [HttpGet("get-All-Posts")]
@@ -27,6 +60,12 @@ namespace GData.Controllers
         {
 
             var result = await postsService.GetAllPosts();
+            if(result.Count<1)
+            {
+
+                return NotFound();
+
+            }
             return Ok(result);
 
         }
@@ -36,6 +75,12 @@ namespace GData.Controllers
         {
 
             var result=await postsService.GetAllPostsByUser(ownerId);
+            if (result.Count < 1)
+            {
+
+                return NotFound();
+
+            }
             return Ok(result);  
 
         }

@@ -228,8 +228,10 @@ namespace GData.Services.Users
         private async Task<TokenDTO> CreateJwtToken(User user)
         {
 
-           return new TokenDTO { AccessToken = CreateJWTToken(user) };
-            
+           var token= new TokenDTO { AccessToken = CreateJWTToken(user) };
+
+           return token;
+
         }
 
         public async Task<TokenDTO> LoginService(LoginUserDTO request)

@@ -41,7 +41,7 @@ namespace GData.Exceptions
         public Task<Post> PostDoesNotExist()
         {
 
-            throw new ArgumentNullException("The post cannot be edited because it does not exist or was deleted!"); //Also used in delete post
+            throw new ArgumentNullException("The post cannot be edited because it does not exist or was deleted!"); //Also used in delete post and GetPostById
 
         }
 

@@ -1,4 +1,5 @@
 ﻿using GData.DTOs.PostDTO;
+using GData.DTOs.UserDTO;
 using GData.Entity;
 using GData.Exceptions;
 using GData.Repositories.Posts;
@@ -105,6 +106,13 @@ namespace GData.Services.Posts
         {
            
             var post= await postsRepository.GetPostById(Id);
+
+            if(post is null)
+            {
+
+                return await postsExceptionList.PostDoesNotExist();
+
+            }
 
             return post;
 
