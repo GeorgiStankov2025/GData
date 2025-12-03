@@ -11,6 +11,8 @@ namespace GData.Data
 
         public DbSet<Post> Posts => Set<Post>();
 
+        public DbSet<PostComment> PostComments => Set<PostComment>();
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
@@ -24,6 +26,10 @@ namespace GData.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Post>().HasOne(p=>p.Owner).WithMany(u=>u.UserPosts).HasForeignKey(p=>p.OwnerId);
+
+            modelBuilder.Entity<PostComment>().HasOne(pc=>pc.Author).WithMany(au=>au.PostComments).HasForeignKey(pc=>pc.AuthorId);
+
+            modelBuilder.Entity<PostComment>().HasOne(pc=>pc.Post).WithMany(p=>p.PostComments).HasForeignKey(pc=>pc.PostId);
 
         }
 
