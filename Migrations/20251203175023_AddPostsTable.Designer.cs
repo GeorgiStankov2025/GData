@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GData.Migrations
 {
     [DbContext(typeof(GDataDbContext))]
-    [Migration("20251130133746_AddPostsTable")]
+    [Migration("20251203175023_AddPostsTable")]
     partial class AddPostsTable
     {
         /// <inheritdoc />

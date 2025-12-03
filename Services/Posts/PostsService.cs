@@ -17,7 +17,6 @@ namespace GData.Services.Posts
                 OwnerId = OwnerId,
                 Title = request.Title,
                 DateCreated = DateTime.UtcNow,
-                Owner=owner
 
             };
 

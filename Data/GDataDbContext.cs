@@ -21,7 +21,9 @@ namespace GData.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             
-            modelBuilder.Entity<Post>().HasOne(p=>p.Owner).WithMany(u=>u.UserPosts).HasPrincipalKey(p=>p.Id).HasForeignKey(p=>p.OwnerId);
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Post>().HasOne(p=>p.Owner).WithMany(u=>u.UserPosts).HasForeignKey(p=>p.OwnerId);
 
         }
 

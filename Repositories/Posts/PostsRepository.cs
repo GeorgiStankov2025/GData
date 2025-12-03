@@ -1,15 +1,17 @@
 ﻿using GData.Data;
 using GData.DTOs.PostDTO;
 using GData.Entity;
+using GData.Services.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace GData.Repositories.Posts
 {
-    public class PostsRepository(GDataDbContext dbContext) : IPostsRepository
+    public class PostsRepository(GDataDbContext dbContext, IAuthServices authServices) : IPostsRepository
     {
         public async Task<Post> CreatePost(Post post)
         {
-
+            
+            
             await dbContext.Posts.AddAsync(post);
             await dbContext.SaveChangesAsync();
 
@@ -39,14 +41,14 @@ namespace GData.Repositories.Posts
         public async Task<List<Post>> GetAllPosts()
         {
 
-            return await dbContext.Posts.ToListAsync();
+            return await dbContext.Posts.Include<Post, User>(p => p.Owner).ToListAsync();
 
         }
 
         public Task<Post> GetPostById(Guid Id)
         {
 
-            var post = dbContext.Posts.Include(p => p.Owner).FirstOrDefaultAsync(p=>p.Id==Id);
+            var post = dbContext.Posts.Include<Post,User>(p => p.Owner).FirstOrDefaultAsync(p=>p.Id==Id);
 
             return post;
 
@@ -55,7 +57,7 @@ namespace GData.Repositories.Posts
         public async Task<Post> GetPostByOwnerId(Guid ownerId)
         {
             
-            var post = await dbContext.Posts.Include(p => p.Owner).FirstOrDefaultAsync(p=>p.OwnerId==ownerId);
+            var post = await dbContext.Posts.Include<Post, User>(p => p.Owner).FirstOrDefaultAsync(p=>p.OwnerId==ownerId);
 
             return post;
 
@@ -64,7 +66,7 @@ namespace GData.Repositories.Posts
         public async Task<Post> GetPostByTitle(string title)
         {
 
-            var post = await dbContext.Posts.Include(p => p.Owner).FirstOrDefaultAsync(p => p.Title == title);
+            var post = await dbContext.Posts.Include<Post, User>(p => p.Owner).FirstOrDefaultAsync(p => p.Title == title);
 
             return post;
 
