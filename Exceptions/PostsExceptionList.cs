@@ -29,7 +29,7 @@ namespace GData.Exceptions
 
         }
 
-        public Task<Post> UnverifiedOwner() //Also used in edit post
+        public Task<Post> UnverifiedOwner() //Also used in edit post and delete post
         {
 
             throw new UnauthorizedAccessException("Post owner's email address is not verified!");
@@ -41,7 +41,7 @@ namespace GData.Exceptions
         public Task<Post> PostDoesNotExist()
         {
 
-            throw new ArgumentNullException("The post cannot be edited because it does not exist or was deleted!");
+            throw new ArgumentNullException("The post cannot be edited because it does not exist or was deleted!"); //Also used in delete post
 
         }
 

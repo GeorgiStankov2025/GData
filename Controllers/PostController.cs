@@ -187,13 +187,47 @@ namespace GData.Controllers
             }
         }
 
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         [HttpDelete("delete-Post{Id}")]
         public async Task<ActionResult<Post>> DeletePost(Guid Id)
         {
+            try
+            {
+                var result = await postsService.DeletePostService(Id);
+                return Ok(result);
+            }
+            catch (ArgumentNullException nullException)
+            {
 
-            var result=await postsService.DeletePostService(Id);
-            return Ok(result);
+                logger.LogError(nullException, $"Not Found!");
+                return Problem(
 
+                    detail: nullException.Message,
+                    title: "Not found!",
+                    statusCode: StatusCodes.Status404NotFound,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch (Exception ex)
+            {
+
+                logger.LogError(ex, $"An unexpected error occured");
+                return Problem(
+
+                    detail: ex.Message,
+                    title: "Internal Server Error",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
         }
 
     }

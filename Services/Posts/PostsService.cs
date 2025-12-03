@@ -55,8 +55,15 @@ namespace GData.Services.Posts
 
         public async Task<Post> DeletePostService(Guid Id)
         {
-            
+
             var post=await postsRepository.GetPostById(Id);
+
+            if(post==null)
+            {
+
+                return await postsExceptionList.PostDoesNotExist();
+
+            }
 
             await postsRepository.DeletePost(post);
 
