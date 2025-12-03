@@ -106,7 +106,43 @@ namespace GData.Services.Posts
         public async Task<Post> UpdatePostService(PostDTO request,Guid Id)
         {
 
+            if(string.IsNullOrWhiteSpace(request.Title))
+            {
+
+                return await postsExceptionList.NoTitleHasBeenProvidedForPost();
+
+            }
+
+            if(request.Title.Length<3)
+            {
+
+                return await postsExceptionList.TitleNeedsToHaveMoreThanThreeChars();
+
+            }
+
             var post=await GetPostById(Id);
+
+            if(post.Owner is null)
+            {
+
+                return await postsExceptionList.EditPostOwnerDoesNotExist();
+
+            }
+
+            if(post is null)
+            {
+
+                return await postsExceptionList.PostDoesNotExist();
+
+            }
+
+            if(post.Owner.IsEmailConfirmed==false)
+            {
+
+                return await postsExceptionList.UnverifiedOwner();
+
+            }
+
             await postsRepository.EditPost(request,post);
 
             return post;

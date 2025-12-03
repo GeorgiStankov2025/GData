@@ -112,14 +112,79 @@ namespace GData.Controllers
 
             }
         }
-
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         [HttpPatch("edit-Post{Id}")]
         public async Task<ActionResult<Post>> EditPost(Guid Id, PostDTO request)
         {
 
-            var result = await postsService.UpdatePostService(request,Id);
-            return Ok(result);
+            try
+            {
+                var result = await postsService.UpdatePostService(request, Id);
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException unauthorizedException)
+            {
 
+                logger.LogError(unauthorizedException, $"Unauthorized access");
+                return Problem(
+
+                    detail: unauthorizedException.Message,
+                    title: "Unauthorized user access",
+                    statusCode: StatusCodes.Status401Unauthorized,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+
+            catch (ArgumentNullException nullException)
+            {
+
+                logger.LogError(nullException, $"Not Found!");
+                return Problem(
+
+                    detail: nullException.Message,
+                    title: "Not found!",
+                    statusCode: StatusCodes.Status404NotFound,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch (FormatException formatException)
+            {
+
+                logger.LogError(formatException, $"Bad request");
+                return Problem(
+
+                    detail: formatException.Message,
+                    title: "Bad request!",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+
+            catch (Exception ex)
+            {
+
+                logger.LogError(ex, $"An unexpected error occured");
+                return Problem(
+
+                    detail: ex.Message,
+                    title: "Internal Server Error",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
         }
 
         [HttpDelete("delete-Post{Id}")]
