@@ -48,7 +48,7 @@ namespace GData.Repositories.PostsComments
         public async Task<PostComment> GetPostCommentById(Guid Id)
         {
 
-            return await dbContext.PostComments.Include<PostComment,User>(pc=>pc.Author).Include(pc=>pc.Post).FirstOrDefaultAsync(pc => pc.Id == Id);
+            return await dbContext.PostComments.Include<PostComment,User>(pc=>pc.Author).Include<PostComment, Post>(pc=>pc.Post).FirstOrDefaultAsync(pc => pc.Id == Id);
 
         }
     }

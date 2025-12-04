@@ -1,8 +1,10 @@
 using GData.Data;
 using GData.Exceptions;
 using GData.Repositories.Posts;
+using GData.Repositories.PostsComments;
 using GData.Repositories.Users;
 using GData.Services.Posts;
+using GData.Services.PostsComments;
 using GData.Services.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -27,6 +29,8 @@ builder.Services.AddScoped<UserExceptionList>();
 builder.Services.AddScoped<IPostsRepository, PostsRepository>();
 builder.Services.AddScoped<IPostsService,PostsService>();
 builder.Services.AddScoped<PostsExceptionList>();
+builder.Services.AddScoped<IPostsCommentsRepository, PostsCommentsRepository>();
+builder.Services.AddScoped<IPostsCommentsService, PostsCommentsService>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

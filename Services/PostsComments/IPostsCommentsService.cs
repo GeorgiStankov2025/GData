@@ -11,6 +11,8 @@ namespace GData.Services.PostsComments
         public Task<List<PostComment>> GetAllPostCommentsService();
         public Task<List<PostComment>> GetAllPostCommentsInPostService(Guid postId);
         public Task<List<PostComment>> GetAllPostCommentsByUserInPostService(Guid postId, Guid authorId);
-    
+        public Task<PostComment> GetPostCommentById(Guid Id);
+        public Task<PostComment> DeletePostCommentService(Guid authorId, Guid postId, Guid Id);
+
     }
 }

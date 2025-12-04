@@ -29,6 +29,8 @@ namespace GData.Entity
 
         [JsonIgnore]
         public List<Post>? UserPosts { get; set; }
+
+        [JsonIgnore]
         public List<PostComment>? PostComments { get; set; }
 
     }
