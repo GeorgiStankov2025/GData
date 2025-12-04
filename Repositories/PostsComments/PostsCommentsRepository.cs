@@ -45,19 +45,11 @@ namespace GData.Repositories.PostsComments
 
         }
 
-        public Task<List<PostComment>> GetAllPostCommentsWithAuthorId(Guid Id)
+        public async Task<PostComment> GetPostCommentById(Guid Id)
         {
-            throw new NotImplementedException();
-        }
 
-        public Task<List<PostComment>> GetAllPostCommentsWithPostId(Guid Id)
-        {
-            throw new NotImplementedException();
-        }
+            return await dbContext.PostComments.Include<PostComment,User>(pc=>pc.Author).Include(pc=>pc.Post).FirstOrDefaultAsync(pc => pc.Id == Id);
 
-        public Task<PostComment> GetPostCommentById(Guid Id)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -42,14 +42,14 @@ namespace GData.Repositories.Posts
         public async Task<List<Post>> GetAllPosts()
         {
 
-            return await dbContext.Posts.Include<Post, User>(p => p.Owner).ToListAsync();
+            return await dbContext.Posts.Include<Post, User>(p => p.Owner).Include<Post, List<PostComment>>(p => p.PostComments).ToListAsync();
 
         }
 
         public Task<Post> GetPostById(Guid Id)
         {
 
-            var post = dbContext.Posts.Include<Post,User>(p => p.Owner).FirstOrDefaultAsync(p=>p.Id==Id);
+            var post = dbContext.Posts.Include<Post,User>(p => p.Owner).Include<Post, List<PostComment>>(p => p.PostComments).FirstOrDefaultAsync(p=>p.Id==Id);
 
             return post;
 
@@ -58,7 +58,7 @@ namespace GData.Repositories.Posts
         public async Task<Post> GetPostByOwnerId(Guid ownerId)
         {
             
-            var post = await dbContext.Posts.Include<Post, User>(p => p.Owner).FirstOrDefaultAsync(p=>p.OwnerId==ownerId);
+            var post = await dbContext.Posts.Include<Post, User>(p => p.Owner).Include<Post, List<PostComment>>(p => p.PostComments).FirstOrDefaultAsync(p=>p.OwnerId==ownerId);
 
             return post;
 
@@ -67,7 +67,7 @@ namespace GData.Repositories.Posts
         public async Task<Post> GetPostByTitle(string title)
         {
 
-            var post = await dbContext.Posts.Include<Post, User>(p => p.Owner).FirstOrDefaultAsync(p => p.Title == title);
+            var post = await dbContext.Posts.Include<Post, User>(p => p.Owner).Include<Post,List<PostComment>>(p=>p.PostComments).FirstOrDefaultAsync(p => p.Title == title);
 
             return post;
 
