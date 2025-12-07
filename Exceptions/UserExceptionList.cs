@@ -146,6 +146,13 @@ namespace GData.Exceptions
 
         }
 
+        public Task<User> InvalidUser()
+        {
+
+            throw new UnauthorizedAccessException("The requested user is not the account owner");
+
+        }
+
         //Resend Verification code errors
 
         public Task<User> AccountIsVerified()

@@ -54,15 +54,38 @@ namespace GData.Services.Posts
 
         }
 
-        public async Task<Post> DeletePostService(Guid Id)
+        public async Task<Post> DeletePostService(Guid ownerId, Guid Id)
         {
+
+            var owner= await authServices.GetUserByIdService(ownerId);
 
             var post=await postsRepository.GetPostById(Id);
 
-            if(post==null)
+            if(owner is null)
+            {
+
+                return await postsExceptionList.EditPostOwnerDoesNotExist();
+
+            }
+
+            if(ownerId!=owner.Id)
+            {
+
+                return await postsExceptionList.OwnerNotValid();
+
+            }
+
+            if(post is null)
             {
 
                 return await postsExceptionList.PostDoesNotExist();
+
+            }
+
+            if(owner.IsEmailConfirmed==false)
+            {
+
+                return await postsExceptionList.UnverifiedOwner();
 
             }
 
@@ -118,7 +141,7 @@ namespace GData.Services.Posts
 
         }
 
-        public async Task<Post> UpdatePostService(PostDTO request,Guid Id)
+        public async Task<Post> UpdatePostService(Guid ownerId,PostDTO request,Guid Id)
         {
 
             if(string.IsNullOrWhiteSpace(request.Title))
@@ -141,6 +164,13 @@ namespace GData.Services.Posts
             {
 
                 return await postsExceptionList.EditPostOwnerDoesNotExist();
+
+            }
+
+            if(ownerId!=post.OwnerId)
+            {
+
+                return await postsExceptionList.OwnerNotValid();
 
             }
 

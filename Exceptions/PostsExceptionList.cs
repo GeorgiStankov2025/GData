@@ -52,7 +52,12 @@ namespace GData.Exceptions
 
         }
 
+        public Task<Post> OwnerNotValid()
+        {
 
+            throw new UnauthorizedAccessException("The user who is trying to edit the post is not it's owner!");
+
+        }
 
     }
 }

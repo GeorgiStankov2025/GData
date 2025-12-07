@@ -178,7 +178,7 @@ namespace GData.Controllers
 
         }
 
-        [HttpPost("verify-Account")]
+        [HttpPost("verify-Account{Id}")]
         public async Task<ActionResult<bool>> VerifyAccount(Guid Id, int code)
         {
 
@@ -265,19 +265,19 @@ namespace GData.Controllers
         }
 
         [Authorize]
-        [HttpPatch("change-Password")]
+        [HttpPatch("change-Password{Id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized,Type=typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
 
-        public async Task<ActionResult<User>> ChangePassword(ChangePasswordDTO request)
+        public async Task<ActionResult<User>> ChangePassword(Guid Id,ChangePasswordDTO request)
         {
 
             try
             {
 
-                var result = await authServices.ChangePasswordService(request);
+                var result = await authServices.ChangePasswordService(Id,request);
                 return Ok(result);
 
             }

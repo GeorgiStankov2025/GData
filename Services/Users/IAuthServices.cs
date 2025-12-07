@@ -9,7 +9,7 @@ namespace GData.Services.Users
         public Task<User> RegisterService(RegisterUserDTO request);
         public Task<bool> VerifyAccountService(Guid Id,int code);
         public Task<TokenDTO> LoginService(LoginUserDTO request);
-        public Task<User> ChangePasswordService(ChangePasswordDTO request);
+        public Task<User> ChangePasswordService(Guid Id,ChangePasswordDTO request);
         public Task<User> GetUserByUsernameService(string username);
         public Task<User> GetUserByIdService(Guid Id);
         public Task<User> ResendVerificationCodeService(Guid Id);

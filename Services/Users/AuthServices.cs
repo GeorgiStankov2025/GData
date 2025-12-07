@@ -259,10 +259,17 @@ namespace GData.Services.Users
 
         }
 
-        public async Task<User> ChangePasswordService(ChangePasswordDTO request)
-        {
-            
+        public async Task<User> ChangePasswordService(Guid Id, ChangePasswordDTO request)
+        { 
+
             var user=await authRepository.GetUserByUsername(request.Username);
+
+            if(Id!=user.Id)
+            {
+
+                return await exceptionList.InvalidUser();
+
+            }
 
             PasswordHasher<User> passwordHasher = new PasswordHasher<User>();
 

@@ -14,7 +14,7 @@ namespace GData.Controllers
     {
 
         [HttpGet("get-Post-By-Id{Id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Post))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
 
         public async Task<ActionResult<Post>> GetPostById(Guid Id)
@@ -78,7 +78,7 @@ namespace GData.Controllers
             if (result.Count < 1)
             {
 
-                return NotFound();
+                return NoContent();
 
             }
             return Ok(result);  
@@ -87,7 +87,7 @@ namespace GData.Controllers
 
         [Authorize]
         [HttpPost("create-Post{ownerId}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Post))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
@@ -158,18 +158,18 @@ namespace GData.Controllers
             }
         }
         [Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Post))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        [HttpPatch("edit-Post{Id}")]
-        public async Task<ActionResult<Post>> EditPost(Guid Id, PostDTO request)
+        [HttpPatch("edit-Post{ownerId},{Id}")]
+        public async Task<ActionResult<Post>> EditPost(Guid ownerId,Guid Id, PostDTO request)
         {
 
             try
             {
-                var result = await postsService.UpdatePostService(request, Id);
+                var result = await postsService.UpdatePostService(ownerId,request, Id);
                 return Ok(result);
             }
             catch (UnauthorizedAccessException unauthorizedException)
@@ -233,18 +233,34 @@ namespace GData.Controllers
         }
 
         [Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Post))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type=typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        [HttpDelete("delete-Post{Id}")]
-        public async Task<ActionResult<Post>> DeletePost(Guid Id)
+        [HttpDelete("delete-Post{ownerId},{Id}")]
+        public async Task<ActionResult<Post>> DeletePost(Guid ownerId,Guid Id)
         {
             try
             {
-                var result = await postsService.DeletePostService(Id);
+                var result = await postsService.DeletePostService(ownerId,Id);
                 return Ok(result);
             }
+            catch (UnauthorizedAccessException unauthorizedException)
+            {
+
+                logger.LogError(unauthorizedException, $"Unauthorized access");
+                return Problem(
+
+                    detail: unauthorizedException.Message,
+                    title: "Unauthorized user access",
+                    statusCode: StatusCodes.Status401Unauthorized,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+
             catch (ArgumentNullException nullException)
             {
 
@@ -259,6 +275,21 @@ namespace GData.Controllers
                 );
 
             }
+            catch (FormatException formatException)
+            {
+
+                logger.LogError(formatException, $"Bad request");
+                return Problem(
+
+                    detail: formatException.Message,
+                    title: "Bad request!",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+
             catch (Exception ex)
             {
 
