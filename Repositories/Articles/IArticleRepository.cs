@@ -10,6 +10,6 @@ namespace GData.Repositories.Articles
         public Task<Article> GetArticleByTitle(string title);
         public Task<List<Article>> GetAllArticles();
         public Task<Article> EditArticle(Article article, ArticleDTO request);
-        public Task<Article> DeleteArticle(Guid Id);
+        public Task<Article> DeleteArticle(Article article);
     }
 }
