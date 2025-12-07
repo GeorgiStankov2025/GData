@@ -1,0 +1,17 @@
+﻿using GData.DTOs.ArticlesDTO;
+using GData.Entity;
+
+namespace GData.Services.Articles
+{
+    public interface IArticleServices
+    {
+
+        public Task<Article> CreateArticleService(Guid creatorId, ArticleDTO request);
+        public Task<Article> GetArticleByIdService(Guid Id);
+        public Task<Article> GetArticleByTitleService(string title);
+        public Task<List<Article>> GetAllArticlesService();
+        public Task<Article> EditArticleService(Guid creatorId,Guid Id, ArticleDTO request);
+        public Task<Article> DeleteArticleService(Guid creatorId,Guid Id);
+
+    }
+}
