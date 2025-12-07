@@ -10,8 +10,8 @@ namespace GData.Services.Articles
         public Task<Article> GetArticleByIdService(Guid Id);
         public Task<Article> GetArticleByTitleService(string title);
         public Task<List<Article>> GetAllArticlesService();
-        public Task<Article> EditArticleService(Guid creatorId,Guid Id, ArticleDTO request);
-        public Task<Article> DeleteArticleService(Guid creatorId,Guid Id);
+        public Task<Article> EditArticleService(Guid Id, ArticleDTO request);
+        public Task<Article> DeleteArticleService(Guid Id);
 
     }
 }

@@ -49,5 +49,14 @@ namespace GData.Exceptions
 
         }
 
+        //Edit article
+
+        public Task<Article> EditArticleCreatorDoesNotExist()
+        {
+
+            throw new ArgumentNullException("The article cannot be edited because its creator is deleted or does not exist!");
+
+        }
+
     }
 }
