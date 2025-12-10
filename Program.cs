@@ -41,6 +41,7 @@ builder.Services.AddScoped<IArticleServices,ArticleServices>();
 builder.Services.AddScoped<ArticlesExceptionList>();
 builder.Services.AddScoped<IArticlesCommentsRepository, ArticlesCommentsRepository>();
 builder.Services.AddScoped<IArticlesCommentsServices, ArticlesCommentsServices>();
+builder.Services.AddScoped<ArticleCommentsExceptionList>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

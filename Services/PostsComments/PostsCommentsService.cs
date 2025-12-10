@@ -14,7 +14,7 @@ namespace GData.Services.PostsComments
 
             var author = await authServices.GetUserByIdService(authorId);
 
-            var post = postsServices.GetPostById(postId);
+            var post = await postsServices.GetPostById(postId);
 
             if (author is null)
             {

@@ -215,12 +215,12 @@ namespace GData.Controllers
         }
 
         [Authorize]
+        [HttpDelete("delete-Post-Comment{authorId},{postId},{Id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PostComment))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        [HttpDelete("delete-Post-Comment{authorId},{postId},{Id}")]
         public async Task<ActionResult<PostComment>> DeletePostComment(Guid authorId,Guid postId,Guid Id)
         {
 
