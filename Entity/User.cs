@@ -35,5 +35,9 @@ namespace GData.Entity
 
         [JsonIgnore]
         public List<Article>? UserArticles { get; set; }
+
+        [JsonIgnore]
+        public List<ArticleComment>? ArticleComments { get; set; }
+
     }
 }

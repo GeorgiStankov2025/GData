@@ -1,4 +1,6 @@
-﻿namespace GData.Entity
+﻿using System.Text.Json.Serialization;
+
+namespace GData.Entity
 {
     public class Article
     {
@@ -11,6 +13,9 @@
         public User? ArticleCreator { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime DateModified { get; set; }
+        
+        [JsonIgnore]
+        public List<ArticleComment>? ArticleComments { get; set; }
 
     }
 }
