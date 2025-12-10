@@ -200,7 +200,7 @@ namespace GData.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<Article>> EditArticle(Guid creatorId, Guid Id, ArticleDTO request)
+        public async Task<ActionResult<Article>> EditArticle(Guid Id, ArticleDTO request)
         {
 
             try
