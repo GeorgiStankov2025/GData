@@ -1,10 +1,12 @@
 using GData.Data;
 using GData.Exceptions;
 using GData.Repositories.Articles;
+using GData.Repositories.ArticlesComments;
 using GData.Repositories.Posts;
 using GData.Repositories.PostsComments;
 using GData.Repositories.Users;
 using GData.Services.Articles;
+using GData.Services.ArticlesComments;
 using GData.Services.Posts;
 using GData.Services.PostsComments;
 using GData.Services.Users;
@@ -37,6 +39,8 @@ builder.Services.AddScoped<PostCommentsExceptionList>();
 builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 builder.Services.AddScoped<IArticleServices,ArticleServices>();
 builder.Services.AddScoped<ArticlesExceptionList>();
+builder.Services.AddScoped<IArticlesCommentsRepository, ArticlesCommentsRepository>();
+builder.Services.AddScoped<IArticlesCommentsServices, ArticlesCommentsServices>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
