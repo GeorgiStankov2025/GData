@@ -42,6 +42,8 @@ namespace GData.Data
 
             modelBuilder.Entity<ArticleComment>().HasOne(ac=>ac.Article).WithMany(a=>a.ArticleComments).HasForeignKey(ac=>ac.ArticleId);
 
+            modelBuilder.Entity<Groupchat>().HasOne(gc => gc.ChatCreator).WithMany(u => u.ChatsCreated).HasForeignKey(gc => gc.CreatorId);
+
         }
 
     }

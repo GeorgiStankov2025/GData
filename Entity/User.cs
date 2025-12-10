@@ -39,6 +39,9 @@ namespace GData.Entity
         [JsonIgnore]
         public List<ArticleComment>? ArticleComments { get; set; }
 
+        [JsonIgnore]
+        public List<Groupchat>? ChatsCreated {  get; set; }
+
         public List<Groupchat>? UserGroupchats { get; set; } 
 
     }
