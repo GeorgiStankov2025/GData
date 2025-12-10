@@ -17,6 +17,7 @@ namespace GData.Data
 
         public DbSet<ArticleComment> ArticleComments => Set<ArticleComment>();
 
+        public DbSet<Groupchat> Groupchats => Set<Groupchat>();
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
