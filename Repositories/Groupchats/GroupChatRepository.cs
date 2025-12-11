@@ -8,6 +8,15 @@ namespace GData.Repositories.Groupchats
 {
     public class GroupChatRepository(GDataDbContext dbContext) : IGroupChatRepository
     {
+        public async Task<Groupchat> AddUserToGroupChat(User user, Groupchat groupchat)
+        {
+
+            groupchat.ChatMembers.Add(user);
+            await dbContext.SaveChangesAsync();
+            return groupchat;
+
+        }
+
         public async Task<Groupchat> CreateGroupChat(Groupchat groupchat)
         {
             
@@ -44,12 +53,23 @@ namespace GData.Repositories.Groupchats
 
         public async Task<Groupchat> GetGroupchatByChatName(string chatName)
         {
+            
             return await dbContext.Groupchats.Include<Groupchat, List<User>>(gc => gc.ChatMembers).FirstOrDefaultAsync(gc=>gc.ChatName==chatName);
+        
         }
 
         public async Task<Groupchat> GetGroupchatById(Guid Id)
         {
+           
             return await dbContext.Groupchats.Include<Groupchat, List<User>>(gc => gc.ChatMembers).FirstOrDefaultAsync(gc => gc.Id==Id);
+        
+        }
+
+        public async Task<Groupchat> RemoveUserFromGroupChat(User user, Groupchat groupchat)
+        {
+            groupchat.ChatMembers.Remove(user);
+            await dbContext.SaveChangesAsync();
+            return groupchat;
         }
     }
 }

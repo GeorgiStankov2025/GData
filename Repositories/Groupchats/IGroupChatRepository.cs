@@ -12,6 +12,8 @@ namespace GData.Repositories.GroupChat
         public Task<Groupchat> GetGroupchatByChatName(string chatName);
         public Task<Groupchat> EditGroupChatTitle(Groupchat groupchat, GroupchatDTO request);
         public Task<Groupchat> DeleteGroupChat(Groupchat groupchat);
+        public Task<Groupchat> AddUserToGroupChat(User user, Groupchat groupchat);
+        public Task<Groupchat> RemoveUserFromGroupChat(User user, Groupchat groupchat);
 
     }
 }
