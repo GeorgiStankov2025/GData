@@ -39,10 +39,10 @@ namespace GData.Services.Groupchats
 
         }
 
-        public async Task<Groupchat> DeleteGroupChatService(Guid creatorId, Guid id)
+        public async Task<Groupchat> DeleteGroupChatService(Guid creatorId, Guid Id)
         {
             
-            var groupChat=await groupChatRepository.GetGroupchatById(id);
+            var groupChat=await groupChatRepository.GetGroupchatById(Id);
 
             await groupChatRepository.DeleteGroupChat(groupChat);
             return groupChat;
