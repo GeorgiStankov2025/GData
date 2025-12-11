@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GData.Services.Groupchats
 {
-    public class GroupChatsServices(IGroupChatRepository groupChatRepository, IAuthServices authServices, GroupChatExceptionList groupChatExceptionList) : IGroupChatsServices
+    public class GroupChatsServices(IGroupChatRepository groupChatRepository, IAuthServices authServices, GroupChatExceptionList groupChatExceptionList, UserExceptionList userExceptionList) : IGroupChatsServices
     {
         public async Task<Groupchat> AddUserToGroupChatService(Guid creatorId, Guid userId, Guid Id)
         {
@@ -303,6 +303,54 @@ namespace GData.Services.Groupchats
             await groupChatRepository.RemoveUserFromGroupChat(user, groupChat);
             return groupChat;
 
+        }
+
+        public async Task<List<Groupchat>> GetAllGroupChatsForUser(Guid userId)
+        {
+
+            List<Groupchat> selectedGroupChats = new List<Groupchat>();
+
+            var groupchats = await GetAllGroupChatsService();
+
+            var user = await authServices.GetUserByIdService(userId);
+
+            foreach (var groupchat in groupchats)
+            {
+
+                if (groupchat.ChatMembers.Contains(user))
+                {
+
+                    selectedGroupChats.Add(groupchat);
+
+                }
+
+            }
+
+            return selectedGroupChats;
+
+        }
+
+        public async Task<List<Groupchat>> GetAllGroupChatsCreatedByUser(Guid userId)
+        {
+            List<Groupchat> selectedGroupChats = new List<Groupchat>();
+
+            var groupchats = await GetAllGroupChatsService();
+
+            var user = await authServices.GetUserByIdService(userId);
+
+            foreach (var groupchat in groupchats)
+            {
+
+                if (groupchat.CreatorId==userId)
+                {
+
+                    selectedGroupChats.Add(groupchat);
+
+                }
+
+            }
+
+            return selectedGroupChats;
         }
     }
 }

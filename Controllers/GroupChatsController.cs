@@ -104,6 +104,137 @@ namespace GData.Controllers
             return Ok(result);
 
         }
+        [HttpGet("get-All-GroupChats-Where-User-Is-Member{userId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Groupchat))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+        public async Task<ActionResult<List<Groupchat>>> GetAllGroupChatsWhereUserIsMember(Guid userId)
+        {
+            try
+            {
+
+                var result = await groupChatsServices.GetAllGroupChatsForUser(userId);
+
+                if (result.Count < 1)
+                {
+
+                    return NoContent();
+
+                }
+
+                return Ok(result);
+
+            }
+            catch (ArgumentNullException nullException)
+            {
+
+                logger.LogError(nullException, $"Bad request");
+                return Problem(
+
+                    detail: nullException.Message,
+                    title: "Bad request!",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch (FormatException formatException)
+            {
+
+                logger.LogError(formatException, $"Bad request");
+                return Problem(
+
+                    detail: formatException.Message,
+                    title: "Bad request!",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch (Exception ex)
+            {
+
+                logger.LogError(ex, $"An unexpected error occured");
+                return Problem(
+
+                    detail: ex.Message,
+                    title: "Internal Server Error",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+        }
+
+        [HttpGet("get-All-GroupChats-Created-By-User{userId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Groupchat))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+        public async Task<ActionResult<List<Groupchat>>> GetAllGroupChatsCreatedByUser(Guid userId)
+        {
+
+            try
+            {
+                var result = await groupChatsServices.GetAllGroupChatsCreatedByUser(userId);
+
+                if (result.Count < 1)
+                {
+
+                    return NoContent();
+
+                }
+
+                return Ok(result);
+            }
+            catch (ArgumentNullException nullException)
+            {
+
+                logger.LogError(nullException, $"Bad request");
+                return Problem(
+
+                    detail: nullException.Message,
+                    title: "Bad request!",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch (FormatException formatException)
+            {
+
+                logger.LogError(formatException, $"Bad request");
+                return Problem(
+
+                    detail: formatException.Message,
+                    title: "Bad request!",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+
+            catch (Exception ex)
+            {
+
+                logger.LogError(ex, $"An unexpected error occured");
+                return Problem(
+
+                    detail: ex.Message,
+                    title: "Internal Server Error",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+        }
 
         [HttpGet("get-GroupChat-By-Id{Id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Groupchat))]
@@ -149,6 +280,7 @@ namespace GData.Controllers
 
         [HttpGet("get-GroupChat-By-ChatName")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Groupchat))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<Groupchat>> GetGroupChatByChatName(string chatName)
@@ -169,6 +301,20 @@ namespace GData.Controllers
                     detail: nullException.Message,
                     title: "Not found!",
                     statusCode: StatusCodes.Status404NotFound,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch (FormatException formatException)
+            {
+
+                logger.LogError(formatException, $"Bad request");
+                return Problem(
+
+                    detail: formatException.Message,
+                    title: "Bad request!",
+                    statusCode: StatusCodes.Status400BadRequest,
                     instance: HttpContext.TraceIdentifier
 
                 );
