@@ -47,6 +47,7 @@ builder.Services.AddScoped<IArticlesCommentsServices, ArticlesCommentsServices>(
 builder.Services.AddScoped<ArticleCommentsExceptionList>();
 builder.Services.AddScoped<IGroupChatRepository, GroupChatRepository>();
 builder.Services.AddScoped<IGroupChatsServices, GroupChatsServices>();
+builder.Services.AddScoped<GroupChatExceptionList>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
