@@ -2,6 +2,7 @@
 using GData.DTOs.GroupchatsDTO;
 using GData.Entity;
 using GData.Repositories.GroupChat;
+using Microsoft.EntityFrameworkCore;
 
 namespace GData.Repositories.Groupchats
 {
@@ -16,29 +17,39 @@ namespace GData.Repositories.Groupchats
 
         }
 
-        public Task<Groupchat> DeleteGroupChat(Groupchat groupchat)
+        public async Task<Groupchat> DeleteGroupChat(Groupchat groupchat)
         {
-            throw new NotImplementedException();
+            
+            dbContext.Groupchats.Remove(groupchat);
+            await dbContext.SaveChangesAsync();
+            return groupchat;
+
         }
 
-        public Task<Groupchat> EditGroupChatTitle(Groupchat groupchat, GroupchatDTO request)
+        public async Task<Groupchat> EditGroupChatTitle(Groupchat groupchat, GroupchatDTO request)
         {
-            throw new NotImplementedException();
+            
+            groupchat.ChatName=request.ChatTitle;
+            await dbContext.SaveChangesAsync();
+            return groupchat;
+
         }
 
-        public Task<List<Groupchat>> GetAllGroupchats()
+        public async Task<List<Groupchat>> GetAllGroupchats()
         {
-            throw new NotImplementedException();
+
+            return await dbContext.Groupchats.Include<Groupchat,List<User>>(gc=>gc.ChatMembers).ToListAsync();
+
         }
 
-        public Task<Groupchat> GetGroupchatByChatName(string chatName)
+        public async Task<Groupchat> GetGroupchatByChatName(string chatName)
         {
-            throw new NotImplementedException();
+            return await dbContext.Groupchats.Include<Groupchat, List<User>>(gc => gc.ChatMembers).FirstOrDefaultAsync(gc=>gc.ChatName==chatName);
         }
 
-        public Task<Groupchat> GetGroupchatById(Guid Id)
+        public async Task<Groupchat> GetGroupchatById(Guid Id)
         {
-            throw new NotImplementedException();
+            return await dbContext.Groupchats.Include<Groupchat, List<User>>(gc => gc.ChatMembers).FirstOrDefaultAsync(gc => gc.Id==Id);
         }
     }
 }
