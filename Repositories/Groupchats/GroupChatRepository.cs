@@ -67,9 +67,11 @@ namespace GData.Repositories.Groupchats
 
         public async Task<Groupchat> RemoveUserFromGroupChat(User user, Groupchat groupchat)
         {
+            
             groupchat.ChatMembers.Remove(user);
             await dbContext.SaveChangesAsync();
             return groupchat;
+
         }
     }
 }
