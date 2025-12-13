@@ -103,6 +103,7 @@ namespace GData.Controllers
         [HttpGet("get-All-Messages-In-Group-Chat{memberId},{groupChatId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<GroupchatMessage>))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<List<GroupchatMessage>>> GetAllMessagesInGroupChat(Guid memberId, Guid groupChatId)
@@ -141,6 +142,20 @@ namespace GData.Controllers
                 );
 
             }
+            catch (FormatException formatException)
+            {
+
+                logger.LogError(formatException, $"Bad request");
+                return Problem(
+
+                    detail: formatException.Message,
+                    title: "Bad request!",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
             catch (Exception ex)
             {
 
@@ -161,6 +176,7 @@ namespace GData.Controllers
         [HttpGet("get-All-Messages-By-User-In-GroupChat{memberId},{groupChatId},{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<GroupchatMessage>))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<List<GroupchatMessage>>> GetAllMessagesInGroupChatByUser(Guid memberId, Guid groupChatId,Guid userId)
@@ -194,6 +210,20 @@ namespace GData.Controllers
                     detail: nullException.Message,
                     title: "Not Found!",
                     statusCode: StatusCodes.Status404NotFound,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch (FormatException formatException)
+            {
+
+                logger.LogError(formatException, $"Bad request");
+                return Problem(
+
+                    detail: formatException.Message,
+                    title: "Bad request!",
+                    statusCode: StatusCodes.Status400BadRequest,
                     instance: HttpContext.TraceIdentifier
 
                 );
