@@ -18,6 +18,9 @@ namespace GData.Data
         public DbSet<ArticleComment> ArticleComments => Set<ArticleComment>();
 
         public DbSet<Groupchat> Groupchats => Set<Groupchat>();
+
+        public DbSet<GroupchatMessage> GroupchatMessages => Set<GroupchatMessage>();
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
@@ -43,6 +46,10 @@ namespace GData.Data
             modelBuilder.Entity<ArticleComment>().HasOne(ac=>ac.Article).WithMany(a=>a.ArticleComments).HasForeignKey(ac=>ac.ArticleId);
 
             modelBuilder.Entity<Groupchat>().HasOne(gc => gc.ChatCreator).WithMany(u => u.ChatsCreated).HasForeignKey(gc => gc.CreatorId);
+
+            modelBuilder.Entity<GroupchatMessage>().HasOne(gcm => gcm.Author).WithMany(u => u.UserMessages).HasForeignKey(gcm => gcm.AuthorId);
+
+            modelBuilder.Entity<GroupchatMessage>().HasOne(gcm=>gcm.Groupchat).WithMany(gc=>gc.GroupchatMessages).HasForeignKey(gcm=>gcm.GroupchatId);
 
         }
 

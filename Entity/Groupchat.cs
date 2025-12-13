@@ -1,4 +1,6 @@
-﻿namespace GData.Entity
+﻿using System.Text.Json.Serialization;
+
+namespace GData.Entity
 {
     public class Groupchat
     {
@@ -10,6 +12,9 @@
 
         public List<User>? ChatMembers { get; set; }
         public DateTime DateCreated { get; set; }
+
+        [JsonIgnore]
+        public List<GroupchatMessage>? GroupchatMessages { get; set; }
 
     }
 }
