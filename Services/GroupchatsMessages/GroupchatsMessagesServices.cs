@@ -1,13 +1,20 @@
 ﻿using GData.DTOs.GroupchatsDTO;
 using GData.Entity;
 using GData.Repositories.GroupchatsMessages;
+using GData.Services.Groupchats;
+using GData.Services.Users;
 
 namespace GData.Services.GroupchatsMessages
 {
-    public class GroupchatsMessagesServices(IGroupChatsMessagesRepository groupChatsMessagesRepository) : IGroupchatsMessagesServices
+    public class GroupchatsMessagesServices(IGroupChatsMessagesRepository groupChatsMessagesRepository, IAuthServices authServices, IGroupChatsServices groupChatsServices) : IGroupchatsMessagesServices
     {
         public async Task<GroupchatMessage> CreateMessageService(Guid authorId, Guid groupChatId, GroupchatMessageDTO request)
         {
+
+            var author= await authServices.GetUserByIdService(authorId);
+
+            var groupChat=await groupChatsServices.GetGroupChatByIdService(groupChatId);
+
 
             var message = new GroupchatMessage()
             {
