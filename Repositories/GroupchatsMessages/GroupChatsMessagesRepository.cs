@@ -29,6 +29,7 @@ namespace GData.Repositories.GroupchatsMessages
         {
             
             message.MessageContent=request.Content;
+            message.DateModified = DateTime.UtcNow;
             await dbContext.SaveChangesAsync();
             return message;
 

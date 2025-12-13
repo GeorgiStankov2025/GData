@@ -11,6 +11,7 @@ using GData.Repositories.Users;
 using GData.Services.Articles;
 using GData.Services.ArticlesComments;
 using GData.Services.Groupchats;
+using GData.Services.GroupchatsMessages;
 using GData.Services.Posts;
 using GData.Services.PostsComments;
 using GData.Services.Users;
@@ -50,6 +51,7 @@ builder.Services.AddScoped<IGroupChatRepository, GroupChatRepository>();
 builder.Services.AddScoped<IGroupChatsServices, GroupChatsServices>();
 builder.Services.AddScoped<GroupChatExceptionList>();
 builder.Services.AddScoped<IGroupChatsMessagesRepository, GroupChatsMessagesRepository>();
+builder.Services.AddScoped<IGroupchatsMessagesServices,GroupchatsMessagesServices>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
