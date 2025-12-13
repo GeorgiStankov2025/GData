@@ -17,6 +17,7 @@ namespace GData.Controllers
         [HttpPost("create-PostComment{authorId},{postId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PostComment))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type =typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<PostComment>> CreatePostComment(Guid authorId,Guid postId, PostCommentsDTO request)

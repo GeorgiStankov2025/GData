@@ -11,8 +11,8 @@ namespace GData.Services.GroupchatsMessages
         public Task<GroupchatMessage> DeleteMessageService(Guid authorId, Guid groupChatId, Guid Id);
         public Task<GroupchatMessage> GetMessageByIdService(Guid Id);
         public Task<List<GroupchatMessage>> GetAllMessagesService();
-        public Task<List<GroupchatMessage>> GetAllMessagesInGroupChatService(Guid groupChatId);
-        public Task<List<GroupchatMessage>> GetAllMessagesInGroupChatByUserService(Guid userId,Guid groupChatId);
+        public Task<List<GroupchatMessage>> GetAllMessagesInGroupChatService(Guid memberId,Guid groupChatId);
+        public Task<List<GroupchatMessage>> GetAllMessagesInGroupChatByUserService(Guid memberId, Guid userId,Guid groupChatId);
 
     }
 }

@@ -44,7 +44,7 @@ namespace GData.Exceptions
 
         //GetMessagesForGroupChat
 
-        public Task<GroupchatMessage> UnauthorizedUser()
+        public Task<List<GroupchatMessage>> UnauthorizedUser()
         {
 
             throw new UnauthorizedAccessException("User is not part of the group chat or was removed");
@@ -64,6 +64,13 @@ namespace GData.Exceptions
         {
 
             throw new ArgumentNullException("The message cannot be edited because it does not exist or was deleted.");
+
+        }
+
+        public Task<GroupchatMessage> EditMessageAuthorNotFound()
+        {
+
+            throw new ArgumentNullException("The message cannot be edited because it's author does not exist or was deleted");
 
         }
 
