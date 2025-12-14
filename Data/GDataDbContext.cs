@@ -21,6 +21,8 @@ namespace GData.Data
 
         public DbSet<GroupchatMessage> GroupchatMessages => Set<GroupchatMessage>();
 
+        public DbSet<ArticleTag> ArticleTags=>Set<ArticleTag>();
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
