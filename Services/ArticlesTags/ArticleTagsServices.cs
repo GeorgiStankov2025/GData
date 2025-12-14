@@ -1,17 +1,32 @@
 ﻿using GData.DTOs.ArticlesDTO;
 using GData.Entity;
+using GData.Exceptions;
 using GData.Repositories.ArticlesTags;
 using GData.Services.Articles;
 
 namespace GData.Services.ArticlesTags
 {
-    public class ArticleTagsServices(IArticlesTagsRepository articlesTagsRepository, IArticleServices articleServices) : IArticleTagsServices
+    public class ArticleTagsServices(IArticlesTagsRepository articlesTagsRepository, IArticleServices articleServices, ArticlestagsExceptionList articlestagsExceptionList) : IArticleTagsServices
     {
         public async Task<ArticleTag> AddArticleToArticleTagListService(Guid articleTagId, Guid articleId)
         {
 
             var articleTag = await GetArticleTagByIdService(articleTagId);
             var article=await articleServices.GetArticleByIdService(articleId);
+
+            if(article is null)
+            {
+
+                return await articlestagsExceptionList.ArticleNotFound();
+
+            }
+
+            if(articleTag is null)
+            {
+
+                return await articlestagsExceptionList.ArticleTagNotFound();
+
+            }
 
             await articlesTagsRepository.AddArticleToArticleTagList(articleTag, article);
             return articleTag;
@@ -20,6 +35,13 @@ namespace GData.Services.ArticlesTags
 
         public async Task<ArticleTag> CreateArticleTagService(ArticleTagDTO request)
         {
+
+            if(string.IsNullOrWhiteSpace(request.Title))
+            {
+
+                return await articlestagsExceptionList.NoDataProvidedForArticleTag();
+
+            }
 
             var articleTag = new ArticleTag()
             {
@@ -38,6 +60,14 @@ namespace GData.Services.ArticlesTags
         {
             
             var articleTag= await GetArticleTagByIdService(Id);
+
+            if(articleTag is null)
+            {
+
+                return await articlestagsExceptionList.ArticleTagNotFound();
+
+            }
+
             await articlesTagsRepository.DeleteArticleTag(articleTag);
             return articleTag;
 
@@ -47,6 +77,20 @@ namespace GData.Services.ArticlesTags
         {
             
             var articleTag=await GetArticleTagByIdService(Id);
+
+            if (string.IsNullOrWhiteSpace(request.Title))
+            {
+
+                return await articlestagsExceptionList.NoDataProvidedForArticleTag();
+
+            }
+
+            if (articleTag is null)
+            {
+
+                return await articlestagsExceptionList.ArticleTagNotFound();
+
+            }
 
             await articlesTagsRepository.EditArticleTag(articleTag, request);
             return articleTag;
@@ -58,6 +102,13 @@ namespace GData.Services.ArticlesTags
             var articleTags=await GetAllArticleTagsService();
 
             var article= await articleServices.GetArticleByIdService(articleId);
+
+            if(article is null)
+            {
+
+                return await articlestagsExceptionList.ArticleNotFoundForList();
+
+            }
 
             List<ArticleTag> selectedTags = new List<ArticleTag>();
 
@@ -88,6 +139,14 @@ namespace GData.Services.ArticlesTags
         {
             
             var articleTag=await articlesTagsRepository.GetArticleTagById(Id);
+
+            if(articleTag is null)
+            {
+
+                return await articlestagsExceptionList.ArticleTagNotFound();
+
+            }
+
             return articleTag;
 
         }
@@ -96,6 +155,14 @@ namespace GData.Services.ArticlesTags
         {
             
             var articleTag=await articlesTagsRepository.GetArticleTagByTitle(title);
+
+            if (articleTag is null)
+            {
+
+                return await articlestagsExceptionList.ArticleTagNotFound();
+
+            }
+
             return articleTag;
 
         }
@@ -105,6 +172,20 @@ namespace GData.Services.ArticlesTags
             
             var articleTag = await GetArticleTagByIdService(articleTagId);
             var article = await articleServices.GetArticleByIdService(articleId);
+
+            if (article is null)
+            {
+
+                return await articlestagsExceptionList.ArticleNotFound();
+
+            }
+
+            if (articleTag is null)
+            {
+
+                return await articlestagsExceptionList.ArticleTagNotFound();
+
+            }
 
             await articlesTagsRepository.RemoveArticleFromArticleTagList(articleTag, article);
             return articleTag;

@@ -57,6 +57,7 @@ builder.Services.AddScoped<IGroupchatsMessagesServices,GroupchatsMessagesService
 builder.Services.AddScoped<GroupChatMessagesExceptionList>();
 builder.Services.AddScoped<IArticlesTagsRepository, ArticlesTagsRepository>();
 builder.Services.AddScoped<IArticleTagsServices, ArticleTagsServices>();
+builder.Services.AddScoped<ArticlestagsExceptionList>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
