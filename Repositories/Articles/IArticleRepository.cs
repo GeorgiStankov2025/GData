@@ -11,5 +11,8 @@ namespace GData.Repositories.Articles
         public Task<List<Article>> GetAllArticles();
         public Task<Article> EditArticle(Article article, ArticleDTO request);
         public Task<Article> DeleteArticle(Article article);
+        public Task<Article> AddArticleToFavouriteArticlesList(Article article, User user);
+        public Task<Article> RemoveArticleFromFavouriteArticlesList(Article article, User user);
+
     }
 }

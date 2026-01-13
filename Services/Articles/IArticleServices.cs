@@ -12,6 +12,8 @@ namespace GData.Services.Articles
         public Task<List<Article>> GetAllArticlesService();
         public Task<Article> EditArticleService(Guid Id, ArticleDTO request);
         public Task<Article> DeleteArticleService(Guid Id);
+        public Task<Article> AddArticleToFavouriteArticlesListService(Guid articleId, Guid userId);
+        public Task<Article> RemoveArticleFromFavouriteArticlesListService(Guid articleId, Guid userId);
 
     }
 }

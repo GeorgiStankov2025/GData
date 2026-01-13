@@ -48,5 +48,7 @@ namespace GData.Entity
         [JsonIgnore]
         public List<GroupchatMessage>? UserMessages { get; set; }
 
+        public List<Article>? FavouriteArticles { get; set; }
+
     }
 }

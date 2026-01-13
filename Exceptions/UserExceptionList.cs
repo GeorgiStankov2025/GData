@@ -162,6 +162,28 @@ namespace GData.Exceptions
 
         }
 
+        //Favourites errors
+
+        public Task<User> ArticleNotFound()
+        {
+
+            throw new ArgumentNullException("The requested article does not exist or was deleted");
+
+        }
+
+        public Task<User> InvalidPersonalDataEdit()
+        {
+
+            throw new UnauthorizedAccessException("Only the person himself can change his personal data.");
+
+        }
+
+        public Task<User> UserNotFound()
+        {
+
+            throw new ArgumentNullException("The requested user does not exist!");
+
+        }
 
     }
 }

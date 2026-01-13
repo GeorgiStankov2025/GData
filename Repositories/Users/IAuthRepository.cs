@@ -13,6 +13,7 @@ namespace GData.Repositories.Users
         public Task<User> GetUserByUsername(string username);
         public Task<List<User>> GetAllUsers();
         public Task<User> ResendVerificationCode(User user);
+        
 
     }
 }

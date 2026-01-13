@@ -2,6 +2,7 @@
 using GData.Entity;
 using GData.Exceptions;
 using GData.Repositories.Users;
+using GData.Services.Articles;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Identity;
@@ -380,5 +381,7 @@ namespace GData.Services.Users
 
 
         }
+
+        
     }
 }

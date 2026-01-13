@@ -14,6 +14,7 @@ namespace GData.Services.Users
         public Task<User> GetUserByIdService(Guid Id);
         public Task<User> ResendVerificationCodeService(Guid Id);
         public Task<List<User>> GetAllUsersService();
+        
 
     }
 

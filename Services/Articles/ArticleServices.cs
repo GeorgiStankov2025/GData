@@ -188,5 +188,28 @@ namespace GData.Services.Articles
             return article;
 
         }
+
+        public async Task<Article> AddArticleToFavouriteArticlesListService(Guid articleId, Guid userId)
+        {
+
+            var article = await GetArticleByIdService(articleId);
+            var user = await authServices.GetUserByIdService(userId);
+
+            await articleRepository.AddArticleToFavouriteArticlesList(article, user);
+            return article;
+
+        }
+
+        public async Task<Article> RemoveArticleFromFavouriteArticlesListService(Guid articleId, Guid userId)
+        {
+
+            var article = await GetArticleByIdService(articleId);
+            var user = await authServices.GetUserByIdService(userId);
+
+            await articleRepository.RemoveArticleFromFavouriteArticlesList(article, user);
+            return article;
+
+        }
+
     }
 }

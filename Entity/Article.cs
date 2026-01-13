@@ -20,5 +20,8 @@ namespace GData.Entity
         [JsonIgnore]
         public List<ArticleTag>? ArticleTags { get; set; }
 
+        [JsonIgnore]
+        public List<User>? UsersFavoringArticle { get; set; } 
+
     }
 }

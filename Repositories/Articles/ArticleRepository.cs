@@ -39,21 +39,42 @@ namespace GData.Repositories.Articles
 
         public async Task<List<Article>> GetAllArticles()
         {
-            return await dbContext.Articles.Include<Article,User>(a=>a.ArticleCreator).ToListAsync();
+            return await dbContext.Articles.Include<Article,User>(a=>a.ArticleCreator).Include<Article, List<User>>(a => a.UsersFavoringArticle).ToListAsync();
         }
 
         public async Task<Article> GetArticleById(Guid Id)
         {
 
-            return await dbContext.Articles.Include<Article, User>(a => a.ArticleCreator).FirstOrDefaultAsync(a => a.Id == Id);
+            return await dbContext.Articles.Include<Article, User>(a => a.ArticleCreator).Include<Article, List<User>>(a => a.UsersFavoringArticle).FirstOrDefaultAsync(a => a.Id == Id);
 
         }
 
         public async Task<Article> GetArticleByTitle(string title)
         {
 
-            return await dbContext.Articles.Include<Article, User>(a => a.ArticleCreator).FirstOrDefaultAsync(a => a.Title==title);
+            return await dbContext.Articles.Include<Article, User>(a => a.ArticleCreator).Include<Article, List<User>>(a => a.UsersFavoringArticle).FirstOrDefaultAsync(a => a.Title==title);
 
         }
+
+        public async Task<Article> RemoveArticleFromFavouriteArticlesList(Article article, User user)
+        {
+
+            user.FavouriteArticles.Remove(article);
+            user.DateModified = DateTime.UtcNow;
+            await dbContext.SaveChangesAsync();
+            return article;
+
+        }
+
+        public async Task<Article> AddArticleToFavouriteArticlesList(Article article, User user)
+        {
+
+            user.FavouriteArticles.Add(article);
+            user.DateModified = DateTime.UtcNow;
+            await dbContext.SaveChangesAsync();
+            return article;
+
+        }
+
     }
 }

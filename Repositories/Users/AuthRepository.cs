@@ -14,6 +14,7 @@ namespace GData.Repositories.Users
 {
     public class AuthRepository(GDataDbContext dbContext) : IAuthRepository
     {
+
         public async Task<User> ChangePassword(string password,User user)
         {
 
@@ -32,21 +33,21 @@ namespace GData.Repositories.Users
         public async Task<List<User>> GetAllUsers()
         {
 
-            return await dbContext.Users.Include<User,List<Post>>(u=>u.UserPosts).ToListAsync();
+            return await dbContext.Users.Include<User,List<Post>>(u=>u.UserPosts).Include<User, List<Article>>(u => u.FavouriteArticles).ToListAsync();
 
         }
 
         public async Task<User> GetUserById(Guid Id)
         {
 
-            return await dbContext.Users.Include<User, List<Post>>(u => u.UserPosts).FirstOrDefaultAsync(u => u.Id == Id);
+            return await dbContext.Users.Include<User, List<Post>>(u => u.UserPosts).Include<User, List<Article>>(u => u.FavouriteArticles).FirstOrDefaultAsync(u => u.Id == Id);
 
         }
 
         public async Task<User> GetUserByUsername(string username)
         {
 
-            return await dbContext.Users.Include<User, List<Post>>(u => u.UserPosts).FirstOrDefaultAsync(u => u.Username == username);
+            return await dbContext.Users.Include<User, List<Post>>(u => u.UserPosts).Include<User, List<Article>>(u => u.FavouriteArticles).FirstOrDefaultAsync(u => u.Username == username);
             
         }
 
