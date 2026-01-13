@@ -529,6 +529,157 @@ namespace GData.Controllers
                 );
 
             }
+
+        }
+
+        [Authorize]
+        [HttpPatch("add-Post-To-ArticleTagList{articleTagId},{postId},{postOwnerId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ArticleTag))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+        public async Task<ActionResult<ArticleTag>> AddPostToArticleTagList(Guid articleTagId, Guid postId, Guid postOwnerId)
+        {
+            try
+            {
+                var result = await articleTagsServices.AddPostToArticleTagListService(articleTagId, postId,postOwnerId);
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException unauthorizedException)
+            {
+
+                logger.LogError(unauthorizedException, $"Unauthorized access");
+                return Problem(
+
+                    detail: unauthorizedException.Message,
+                    title: "Unauthorized user access",
+                    statusCode: StatusCodes.Status401Unauthorized,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+
+            catch (ArgumentNullException nullException)
+            {
+
+                logger.LogError(nullException, $"Not Found!");
+                return Problem(
+
+                    detail: nullException.Message,
+                    title: "Not found!",
+                    statusCode: StatusCodes.Status404NotFound,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch (FormatException formatException)
+            {
+
+                logger.LogError(formatException, $"Bad request");
+                return Problem(
+
+                    detail: formatException.Message,
+                    title: "Bad request!",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+
+            catch (Exception ex)
+            {
+
+                logger.LogError(ex, $"An unexpected error occured");
+                return Problem(
+
+                    detail: ex.Message,
+                    title: "Internal Server Error",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+        }
+
+        [Authorize]
+        [HttpPatch("remove-Post-From-ArticleTagList{articleTagId},{postId},{postOwnerId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ArticleTag))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+        public async Task<ActionResult<ArticleTag>> RemovePostFromArticleTagList(Guid articleTagId, Guid postId,Guid postOwnerId)
+        {
+            try
+            {
+                var result = await articleTagsServices.RemovePostFromArticleTagListService(articleTagId, postId,postOwnerId);
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException unauthorizedException)
+            {
+
+                logger.LogError(unauthorizedException, $"Unauthorized access");
+                return Problem(
+
+                    detail: unauthorizedException.Message,
+                    title: "Unauthorized user access",
+                    statusCode: StatusCodes.Status401Unauthorized,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+
+            catch (ArgumentNullException nullException)
+            {
+
+                logger.LogError(nullException, $"Not Found!");
+                return Problem(
+
+                    detail: nullException.Message,
+                    title: "Not found!",
+                    statusCode: StatusCodes.Status404NotFound,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+            catch (FormatException formatException)
+            {
+
+                logger.LogError(formatException, $"Bad request");
+                return Problem(
+
+                    detail: formatException.Message,
+                    title: "Bad request!",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
+
+            catch (Exception ex)
+            {
+
+                logger.LogError(ex, $"An unexpected error occured");
+                return Problem(
+
+                    detail: ex.Message,
+                    title: "Internal Server Error",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    instance: HttpContext.TraceIdentifier
+
+                );
+
+            }
         }
 
     }

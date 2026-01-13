@@ -3,18 +3,21 @@ using GData.Entity;
 using GData.Exceptions;
 using GData.Repositories.ArticlesTags;
 using GData.Services.Articles;
+using GData.Services.Posts;
+using GData.Services.Users;
 
 namespace GData.Services.ArticlesTags
 {
-    public class ArticleTagsServices(IArticlesTagsRepository articlesTagsRepository, IArticleServices articleServices, ArticlestagsExceptionList articlestagsExceptionList) : IArticleTagsServices
+    public class ArticleTagsServices(IArticlesTagsRepository articlesTagsRepository,IAuthServices authServices,IPostsService postsService, IArticleServices articleServices, ArticlestagsExceptionList articlestagsExceptionList) : IArticleTagsServices
     {
         public async Task<ArticleTag> AddArticleToArticleTagListService(Guid articleTagId, Guid articleId)
         {
 
             var articleTag = await GetArticleTagByIdService(articleTagId);
             var article=await articleServices.GetArticleByIdService(articleId);
+            
 
-            if(article is null)
+            if (article is null)
             {
 
                 return await articlestagsExceptionList.ArticleNotFound();
@@ -28,9 +31,41 @@ namespace GData.Services.ArticlesTags
 
             }
 
+
             await articlesTagsRepository.AddArticleToArticleTagList(articleTag, article);
             return articleTag;
 
+        }
+
+        public async Task<ArticleTag> AddPostToArticleTagListService(Guid articleTagId, Guid postId,Guid postOwnerId)
+        {
+            var articleTag = await GetArticleTagByIdService(articleTagId);
+            var post = await postsService.GetPostById(postId);
+            var postOwner = await authServices.GetUserByIdService(postOwnerId);
+
+            if (post is null)
+            {
+
+                return await articlestagsExceptionList.ArticleNotFound();
+
+            }
+
+            if (articleTag is null)
+            {
+
+                return await articlestagsExceptionList.ArticleTagNotFound();
+
+            }
+
+            if (postOwner != post.Owner)
+            {
+
+                return await articlestagsExceptionList.InvalidPostEditor();
+
+            }
+
+            await articlesTagsRepository.AddPostToArticleTagList(articleTag, post);
+            return articleTag;
         }
 
         public async Task<ArticleTag> CreateArticleTagService(ArticleTagDTO request)
@@ -188,6 +223,41 @@ namespace GData.Services.ArticlesTags
             }
 
             await articlesTagsRepository.RemoveArticleFromArticleTagList(articleTag, article);
+            return articleTag;
+
+        }
+
+        public async Task<ArticleTag> RemovePostFromArticleTagListService(Guid articleTagId, Guid postId, Guid postOwnerId)
+        {
+
+            var articleTag = await GetArticleTagByIdService(articleTagId);
+            var post = await postsService.GetPostById(postId);
+            var postOwner=await authServices.GetUserByIdService(postOwnerId);
+
+            
+
+            if (post is null)
+            {
+
+                return await articlestagsExceptionList.ArticleNotFound();
+
+            }
+
+            if (articleTag is null)
+            {
+
+                return await articlestagsExceptionList.ArticleTagNotFound();
+
+            }
+
+            if (postOwner != post.Owner)
+            {
+
+                return await articlestagsExceptionList.InvalidPostEditor();
+
+            }
+
+            await articlesTagsRepository.RemovePostFromArticleTagList(articleTag, post);
             return articleTag;
 
         }

@@ -8,6 +8,7 @@ namespace GData.Entity
         public Guid Id { get; set; }
         public required string Title { get; set; } = string.Empty;
         public List<Article>? Articles { get; set; }
+        public List<Post>? Posts { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime DateModified { get; set; }
 

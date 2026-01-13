@@ -24,14 +24,28 @@ namespace GData.Exceptions
         public Task<ArticleTag> ArticleNotFound()
         {
 
-            throw new ArgumentNullException("The requested article does not exist or was deleted");
+            throw new ArgumentNullException("The requested article or post does not exist or was deleted");
 
         }
 
         public Task<List<ArticleTag>> ArticleNotFoundForList()
         {
 
-            throw new ArgumentNullException("The requested article does not exist or was deleted");
+            throw new ArgumentNullException("The requested article or post does not exist or was deleted");
+
+        }
+
+        public Task<ArticleTag> InvalidPostEditor()
+        {
+
+            throw new UnauthorizedAccessException("The user, who is trying to edit the post is not it's owner");
+
+        }
+
+        public Task<List<ArticleTag>> InvalidPostEditorList()
+        {
+
+            throw new UnauthorizedAccessException("The user, who is trying to edit the post is not it's owner");
 
         }
 

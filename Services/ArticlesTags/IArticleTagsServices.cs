@@ -15,6 +15,8 @@ namespace GData.Services.ArticlesTags
         public Task<List<ArticleTag>> GetAllArticleTagsForSpecificArticle(Guid articleId);
         public Task<ArticleTag> AddArticleToArticleTagListService(Guid articleTagId,Guid articleId);
         public Task<ArticleTag> RemoveArticleFromArticleTagListService(Guid articleTagId, Guid articleId);
+        public Task<ArticleTag> AddPostToArticleTagListService(Guid articleTagId, Guid postId, Guid postOwnerId);
+        public Task<ArticleTag> RemovePostFromArticleTagListService(Guid articleTagId, Guid postId, Guid postOwnerId);
 
     }
 }

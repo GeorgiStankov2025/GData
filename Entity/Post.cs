@@ -13,6 +13,7 @@ namespace GData.Entity
 
         [JsonIgnore]
         public List<PostComment>? PostComments { get; set; }
-
+        [JsonIgnore]
+        public List<ArticleTag>? PostTags { get; set;}
     }
 }

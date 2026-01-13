@@ -14,6 +14,8 @@ namespace GData.Repositories.ArticlesTags
         public Task<List<ArticleTag>> GetAllArticleTags();
         public Task<ArticleTag> AddArticleToArticleTagList(ArticleTag articleTag,Article article);
         public Task<ArticleTag> RemoveArticleFromArticleTagList(ArticleTag articleTag,Article article);
+        public Task<ArticleTag> AddPostToArticleTagList(ArticleTag articleTag, Post post);
+        public Task<ArticleTag> RemovePostFromArticleTagList(ArticleTag articleTag, Post post);
 
     }
 }

@@ -17,6 +17,16 @@ namespace GData.Repositories.ArticlesTags
 
         }
 
+        public async Task<ArticleTag> AddPostToArticleTagList(ArticleTag articleTag, Post post)
+        {
+
+            articleTag.Posts.Add(post);
+            articleTag.DateModified = DateTime.UtcNow;
+            await dbContext.SaveChangesAsync();
+            return articleTag;
+
+        }
+
         public async Task<ArticleTag> CreateArticleTag(ArticleTag articleTag)
         {
             
@@ -48,21 +58,21 @@ namespace GData.Repositories.ArticlesTags
         public async Task<List<ArticleTag>> GetAllArticleTags()
         {
 
-            return await dbContext.ArticleTags.Include<ArticleTag, List<Article>>(at => at.Articles).ToListAsync();
+            return await dbContext.ArticleTags.Include<ArticleTag, List<Article>>(at => at.Articles).Include<ArticleTag, List<Post>>(at => at.Posts).ToListAsync();
 
         }
 
         public async Task<ArticleTag> GetArticleTagById(Guid Id)
         {
 
-            return await dbContext.ArticleTags.Include<ArticleTag, List<Article>>(at => at.Articles).FirstOrDefaultAsync(at=>at.Id==Id);
+            return await dbContext.ArticleTags.Include<ArticleTag, List<Article>>(at => at.Articles).Include<ArticleTag, List<Post>>(at => at.Posts).FirstOrDefaultAsync(at=>at.Id==Id);
 
         }
 
         public async Task<ArticleTag> GetArticleTagByTitle(string title)
         {
 
-            return await dbContext.ArticleTags.Include<ArticleTag, List<Article>>(at => at.Articles).FirstOrDefaultAsync(at => at.Title == title);
+            return await dbContext.ArticleTags.Include<ArticleTag, List<Article>>(at => at.Articles).Include<ArticleTag, List<Post>>(at => at.Posts).FirstOrDefaultAsync(at => at.Title == title);
 
         }
 
@@ -76,6 +86,15 @@ namespace GData.Repositories.ArticlesTags
 
         }
 
+        public async Task<ArticleTag> RemovePostFromArticleTagList(ArticleTag articleTag, Post post)
+        {
+
+            articleTag.Posts.Remove(post);
+            articleTag.DateModified = DateTime.UtcNow;
+            await dbContext.SaveChangesAsync();
+            return articleTag;
+
+        }
     }
 
 }
