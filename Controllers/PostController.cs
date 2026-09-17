@@ -1,310 +1,65 @@
-﻿using GData.DTOs.PostDTO;
+﻿// PostController.cs
+using GData.DTOs.PostDTO;
 using GData.Entity;
 using GData.Services.Posts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
 
 namespace GData.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PostController(IPostsService postsService, ILogger<PostController> logger) : ControllerBase
+    public class PostController(IPostsService postsService) : ControllerBase
     {
-
-        [HttpGet("get-Post-By-Id{Id}")]
+        [HttpGet("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Post))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-
-        public async Task<ActionResult<Post>> GetPostById(Guid Id)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetPostById(Guid id)
         {
-
-            try
-            {
-                var result = await postsService.GetPostById(Id);
-                return Ok(result);            
-            }
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-        }
-
-        [HttpGet("get-All-Posts")]
-        public async Task<ActionResult<List<Post>>> GetAllPosts()
-        {
-
-            var result = await postsService.GetAllPosts();
-            if(result.Count<1)
-            {
-
-                return NotFound();
-
-            }
+            var result = await postsService.GetPostById(id);
             return Ok(result);
-
         }
 
-        [HttpGet("get-All-Posts-For-User{ownerId}")]
-        public async Task<ActionResult<List<Post>>> GetAllPostsForUser(Guid ownerId)
+        [HttpGet]
+        public async Task<IActionResult> GetAllPosts()
         {
+            var result = await postsService.GetAllPosts();
+            return result.Count == 0 ? NotFound() : Ok(result);
+        }
 
-            var result=await postsService.GetAllPostsByUser(ownerId);
-            if (result.Count < 1)
-            {
-
-                return NoContent();
-
-            }
-            return Ok(result);  
-
+        [HttpGet("owner/{ownerId:guid}")]
+        public async Task<IActionResult> GetAllPostsForUser(Guid ownerId)
+        {
+            var result = await postsService.GetAllPostsByUser(ownerId);
+            return result.Count == 0 ? NoContent() : Ok(result);
         }
 
         [Authorize]
-        [HttpPost("create-Post{ownerId}")]
+        [HttpPost("owner/{ownerId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Post))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<Post>> CreatePost(Guid ownerId, PostDTO request)
+        public async Task<IActionResult> CreatePost(Guid ownerId, [FromBody] PostDTO request)
         {
-            try
-            {
-                var result = await postsService.CreatePostService(ownerId, request);
-                return Ok(result);
-            }
-            catch(UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Bad request");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-        }
-        [Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Post))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        [HttpPatch("edit-Post{ownerId},{Id}")]
-        public async Task<ActionResult<Post>> EditPost(Guid ownerId,Guid Id, PostDTO request)
-        {
-
-            try
-            {
-                var result = await postsService.UpdatePostService(ownerId,request, Id);
-                return Ok(result);
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+            var result = await postsService.CreatePostService(ownerId, request);
+            return Ok(result);
         }
 
         [Authorize]
+        [HttpPatch("{id:guid}/owner/{ownerId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Post))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type=typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        [HttpDelete("delete-Post{ownerId},{Id}")]
-        public async Task<ActionResult<Post>> DeletePost(Guid ownerId,Guid Id)
+        public async Task<IActionResult> EditPost(Guid ownerId, Guid id, [FromBody] PostDTO request)
         {
-            try
-            {
-                var result = await postsService.DeletePostService(ownerId,Id);
-                return Ok(result);
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+            var result = await postsService.UpdatePostService(ownerId, request, id);
+            return Ok(result);
         }
 
+        [Authorize]
+        [HttpDelete("{id:guid}/owner/{ownerId:guid}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Post))]
+        public async Task<IActionResult> DeletePost(Guid ownerId, Guid id)
+        {
+            var result = await postsService.DeletePostService(ownerId, id);
+            return Ok(result);
+        }
     }
 }

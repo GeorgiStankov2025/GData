@@ -1,398 +1,67 @@
-﻿using GData.DTOs.GroupchatsDTO;
+﻿// GroupchatsMessagesController.cs
+using GData.DTOs.GroupchatsDTO;
 using GData.Entity;
 using GData.Services.GroupchatsMessages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace GData.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GroupchatsMessagesController(IGroupchatsMessagesServices groupchatsMessagesServices, ILogger<GroupchatsMessagesController> logger) : ControllerBase
+    public class GroupchatsMessagesController(IGroupchatsMessagesServices groupchatsMessagesServices) : ControllerBase
     {
-
         [Authorize]
-        [HttpPost("create-Message{authorId},{groupChatId}")]
+        [HttpPost("chats/{groupChatId:guid}/authors/{authorId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GroupchatMessage))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<GroupchatMessage>> CreateMessage(Guid authorId, Guid groupChatId, GroupchatMessageDTO request)
+        public async Task<IActionResult> CreateMessage(Guid authorId, Guid groupChatId, [FromBody] GroupchatMessageDTO request)
         {
-
-            try
-            {
-
-                var result = await groupchatsMessagesServices.CreateMessageService(authorId, groupChatId, request);
-                return Ok(result);
-            
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Bad request");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-        }
-
-        [HttpGet("get-All-Messages")]
-        public async Task<ActionResult<List<GroupchatMessage>>> GetAllMessages()
-        {
-
-            var result= await groupchatsMessagesServices.GetAllMessagesService();
+            var result = await groupchatsMessagesServices.CreateMessageService(authorId, groupChatId, request);
             return Ok(result);
+        }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllMessages()
+        {
+            var result = await groupchatsMessagesServices.GetAllMessagesService();
+            return Ok(result);
         }
 
         [Authorize]
-        [HttpGet("get-All-Messages-In-Group-Chat{memberId},{groupChatId}")]
+        [HttpGet("chats/{groupChatId:guid}/members/{memberId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<GroupchatMessage>))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<List<GroupchatMessage>>> GetAllMessagesInGroupChat(Guid memberId, Guid groupChatId)
+        public async Task<IActionResult> GetAllMessagesInGroupChat(Guid memberId, Guid groupChatId)
         {
-            try
-            {
-                var result = await groupchatsMessagesServices.GetAllMessagesInGroupChatService(memberId, groupChatId);
-                return Ok(result);
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not Found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+            var result = await groupchatsMessagesServices.GetAllMessagesInGroupChatService(memberId, groupChatId);
+            return Ok(result);
         }
 
         [Authorize]
-        [HttpGet("get-All-Messages-By-User-In-GroupChat{memberId},{groupChatId},{userId}")]
+        [HttpGet("chats/{groupChatId:guid}/members/{memberId:guid}/users/{userId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<GroupchatMessage>))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<List<GroupchatMessage>>> GetAllMessagesInGroupChatByUser(Guid memberId, Guid groupChatId,Guid userId)
+        public async Task<IActionResult> GetAllMessagesInGroupChatByUser(Guid memberId, Guid groupChatId, Guid userId)
         {
-            try
-            {
-                var result = await groupchatsMessagesServices.GetAllMessagesInGroupChatByUserService(memberId, userId, groupChatId);
-                return Ok(result);
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not Found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+            var result = await groupchatsMessagesServices.GetAllMessagesInGroupChatByUserService(memberId, userId, groupChatId);
+            return Ok(result);
         }
 
         [Authorize]
-        [HttpPatch("edit-Message{authorId},{groupChatId},{Id}")]
+        [HttpPatch("{id:guid}/chats/{groupChatId:guid}/authors/{authorId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GroupchatMessage))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<GroupchatMessage>> EditMessage(Guid authorId,Guid groupChatId, Guid Id, GroupchatMessageDTO request)
+        public async Task<IActionResult> EditMessage(Guid authorId, Guid groupChatId, Guid id, [FromBody] GroupchatMessageDTO request)
         {
-            try
-            {
-                var result = await groupchatsMessagesServices.EditMessageService(authorId, groupChatId, Id, request);
-                return Ok(result);
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+            var result = await groupchatsMessagesServices.EditMessageService(authorId, groupChatId, id, request);
+            return Ok(result);
         }
 
         [Authorize]
-        [HttpDelete("delete-Message{authorId},{groupChatId},{Id}")]
+        [HttpDelete("{id:guid}/chats/{groupChatId:guid}/authors/{authorId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GroupchatMessage))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<GroupchatMessage>> DeleteMessage(Guid authorId, Guid groupChatId, Guid Id)
+        public async Task<IActionResult> DeleteMessage(Guid authorId, Guid groupChatId, Guid id)
         {
-
-            try
-            {
-                var result = await groupchatsMessagesServices.DeleteMessageService(authorId, groupChatId, Id);
-                return Ok(result);
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+            var result = await groupchatsMessagesServices.DeleteMessageService(authorId, groupChatId, id);
+            return Ok(result);
         }
-
     }
 }

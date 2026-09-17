@@ -15,40 +15,37 @@ namespace GData.Repositories.Users
     public class AuthRepository(GDataDbContext dbContext) : IAuthRepository
     {
 
-        public async Task<User> ChangePassword(string password,User user)
+        public async Task<bool> UsernameExistsAsync(string username)
         {
+            return await dbContext.Users.AnyAsync(u => u.Username == username);
+        }
 
-            PasswordHasher<User> passwordHasher= new PasswordHasher<User>();
-
+        public async Task<bool> EmailExistsAsync(string email)
+        {
+            return await dbContext.Users.AnyAsync(u => u.Email == email);
+        }
+        public async Task<User> ChangePassword(string password, User user)
+        {
+            PasswordHasher<User> passwordHasher = new PasswordHasher<User>();
             user.PasswordHash = passwordHasher.HashPassword(user, password);
-
             user.DateModified = DateTime.UtcNow;
-
             await dbContext.SaveChangesAsync();
-
             return user;
-
         }
 
         public async Task<List<User>> GetAllUsers()
         {
-
-            return await dbContext.Users.Include<User,List<Post>>(u=>u.UserPosts).Include<User, List<Article>>(u => u.FavouriteArticles).ToListAsync();
-
+            return await dbContext.Users.Include<User, List<Post>>(u => u.UserPosts).Include<User, List<Article>>(u => u.FavouriteArticles).ToListAsync();
         }
 
         public async Task<User> GetUserById(Guid Id)
         {
-
             return await dbContext.Users.Include<User, List<Post>>(u => u.UserPosts).Include<User, List<Article>>(u => u.FavouriteArticles).FirstOrDefaultAsync(u => u.Id == Id);
-
         }
 
         public async Task<User> GetUserByUsername(string username)
         {
-
             return await dbContext.Users.Include<User, List<Post>>(u => u.UserPosts).Include<User, List<Article>>(u => u.FavouriteArticles).FirstOrDefaultAsync(u => u.Username == username);
-            
         }
 
         public Task<User> Logout()
@@ -58,7 +55,6 @@ namespace GData.Repositories.Users
 
         public async Task<User> Register(RegisterUserDTO request)
         {
-
             var user = new User()
             {
 
@@ -72,34 +68,27 @@ namespace GData.Repositories.Users
             user.PasswordHash = new PasswordHasher<User>().HashPassword(user, request.Password);
             user.UserRole = UserRole.User;
             user.VerificationCode = Random.Shared.Next(100000, 999999);
-            user.DateCreated=DateTime.UtcNow;
+            user.DateCreated = DateTime.UtcNow;
 
             await dbContext.AddAsync(user);
             await dbContext.SaveChangesAsync();
-
             return user;
-
         }
 
         public async Task<User> ResendVerificationCode(User user)
         {
-
             user.VerificationCode = Random.Shared.Next(100000, 999999);
             user.DateModified = DateTime.UtcNow;
             await dbContext.SaveChangesAsync();
             return user;
-
         }
 
-        public async Task<bool> VerifyAccount(User user,int code)
+        public async Task<bool> VerifyAccount(User user, int code)
         {
-
-            if(user!=null)
+            if (user != null)
             {
-
                 if (code == user.VerificationCode)
                 {
-
                     user.IsEmailConfirmed = true;
                     user.VerificationCode = 0;
                     user.DateModified = DateTime.UtcNow;
@@ -109,17 +98,11 @@ namespace GData.Repositories.Users
 
                 else
                 {
-
                     return false;
-
                 }
-
             }
-            else
-            {
-
+            else {
                 return false;
-
             }
 
         }

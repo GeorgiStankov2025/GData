@@ -18,9 +18,6 @@ using GData.Services.Posts;
 using GData.Services.PostsComments;
 using GData.Services.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
@@ -30,36 +27,34 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<GDataDbContext>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthServices, AuthServices>();
-builder.Services.AddScoped<UserExceptionList>();
 builder.Services.AddScoped<IPostsRepository, PostsRepository>();
-builder.Services.AddScoped<IPostsService,PostsService>();
-builder.Services.AddScoped<PostsExceptionList>();
+builder.Services.AddScoped<IPostsService, PostsService>();
 builder.Services.AddScoped<IPostsCommentsRepository, PostsCommentsRepository>();
 builder.Services.AddScoped<IPostsCommentsService, PostsCommentsService>();
-builder.Services.AddScoped<PostCommentsExceptionList>();
 builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
-builder.Services.AddScoped<IArticleServices,ArticleServices>();
-builder.Services.AddScoped<ArticlesExceptionList>();
+builder.Services.AddScoped<IArticleServices, ArticleServices>();
 builder.Services.AddScoped<IArticlesCommentsRepository, ArticlesCommentsRepository>();
 builder.Services.AddScoped<IArticlesCommentsServices, ArticlesCommentsServices>();
-builder.Services.AddScoped<ArticleCommentsExceptionList>();
 builder.Services.AddScoped<IGroupChatRepository, GroupChatRepository>();
 builder.Services.AddScoped<IGroupChatsServices, GroupChatsServices>();
-builder.Services.AddScoped<GroupChatExceptionList>();
 builder.Services.AddScoped<IGroupChatsMessagesRepository, GroupChatsMessagesRepository>();
-builder.Services.AddScoped<IGroupchatsMessagesServices,GroupchatsMessagesServices>();
-builder.Services.AddScoped<GroupChatMessagesExceptionList>();
+builder.Services.AddScoped<IGroupchatsMessagesServices, GroupchatsMessagesServices>();
 builder.Services.AddScoped<IArticlesTagsRepository, ArticlesTagsRepository>();
 builder.Services.AddScoped<IArticleTagsServices, ArticleTagsServices>();
-builder.Services.AddScoped<ArticlestagsExceptionList>();
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = (context) =>
+{
+    var httpContext = context.HttpContext;
+    context.ProblemDetails.Extensions["traceId"] = Activity.Current?.Id ?? httpContext.TraceIdentifier;
+    context.ProblemDetails.Extensions["supportContact"] = "bitproductions2024@gmail.com";
+});
+
 builder.Services.AddOpenApi();
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -69,16 +64,15 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
     policy =>
     {
-       
         policy.WithOrigins("http://localhost:3000");
         policy.AllowAnyHeader();
         policy.AllowAnyMethod();
-    
     });
 });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options => {
+builder.Services.AddSwaggerGen(options =>
+{
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.Http,
@@ -101,7 +95,7 @@ builder.Services.AddSwaggerGen(options => {
 var secret = builder.Configuration.GetValue<string>("AppSettings:Token");
 var issuer = builder.Configuration.GetValue<string>("AppSettings:Issuer");
 var audience = builder.Configuration.GetValue<string>("AppSettings:Audience");
-var key = Encoding.UTF8.GetBytes(builder.Configuration.GetValue<string>("AppSettings:Token"));
+var key = Encoding.UTF8.GetBytes(secret!);
 
 builder.Services.AddAuthentication(x =>
 {
@@ -116,62 +110,20 @@ builder.Services.AddAuthentication(x =>
     {
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
-
         ValidateIssuer = true,
         ValidIssuer = issuer,
-
         ValidateAudience = true,
         ValidAudience = audience,
-
         ValidateLifetime = true,
-
         ClockSkew = TimeSpan.Zero
-
     };
-
-});
-
-builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = (context) =>
-{
-
-    var httpcontext = context.HttpContext;
-    context.ProblemDetails.Extensions["traceId"] = Activity.Current?.Id ?? httpcontext.TraceIdentifier;
-    context.ProblemDetails.Extensions["supportContact"] = "bitproductions2024@gmail.com";
-
-    if (context.ProblemDetails.Status == StatusCodes.Status401Unauthorized)
-    {
-
-        context.ProblemDetails.Title = "Unauthorized access";
-        context.ProblemDetails.Detail = "You are not authorized to access this resource";
-
-    }
-    else if (context.ProblemDetails.Status == StatusCodes.Status400BadRequest)
-    {
-
-        context.ProblemDetails.Title = "Bad request";
-        context.ProblemDetails.Detail = "Your request could not be proccessed";
-
-    }
-    else if (context.ProblemDetails.Status == StatusCodes.Status404NotFound)
-    {
-
-        context.ProblemDetails.Title = "Resource not found";
-        context.ProblemDetails.Detail = "The requested resource was not found";
-
-    }
-    else
-    {
-
-        context.ProblemDetails.Title = "An unexpected error occured";
-        context.ProblemDetails.Detail = "An unexpected error occured!Try again later";
-
-    }
-
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
+app.UseExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -181,9 +133,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors(MyAllowSpecificOrigins);
-
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

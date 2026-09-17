@@ -4,7 +4,6 @@ namespace GData.Entity
 {
     public class ArticleTag
     {
-        
         public Guid Id { get; set; }
         public required string Title { get; set; } = string.Empty;
         public List<Article>? Articles { get; set; }

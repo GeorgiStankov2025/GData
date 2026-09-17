@@ -1,686 +1,109 @@
-﻿using GData.DTOs.ArticlesDTO;
+﻿// ArticlesTagsController.cs
+using GData.DTOs.ArticlesDTO;
 using GData.Entity;
 using GData.Enums;
 using GData.Services.ArticlesTags;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace GData.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ArticlesTagsController(IArticleTagsServices articleTagsServices, ILogger<ArticlesTagsController> logger) : ControllerBase
+    public class ArticlesTagsController(IArticleTagsServices articleTagsServices) : ControllerBase
     {
-
-        [Authorize(Roles =nameof(UserRole.Admin))]
-        [HttpPost("create-ArticleTag")]
+        [Authorize(Roles = nameof(UserRole.Admin))]
+        [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ArticleTag))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<ArticleTag>> CreateArticleTag(ArticleTagDTO request)
+        public async Task<IActionResult> CreateArticleTag([FromBody] ArticleTagDTO request)
         {
-            try
-            {
-                var result = await articleTagsServices.CreateArticleTagService(request);
-                return Ok(result);
-
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Bad request");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-        }
-
-        [HttpGet("get-All-Article-Tags")]
-        public async Task<ActionResult<List<ArticleTag>>> GetAllArticleTags()
-        {
-
-            var result = await articleTagsServices.GetAllArticleTagsService();
-
-            if(result.Count<1)
-            {
-
-                return NoContent();
-
-            }
-
+            var result = await articleTagsServices.CreateArticleTagService(request);
             return Ok(result);
-
         }
 
-        [HttpGet("get-All-Article-tags-For-Specific-Article{articleId}")]
-        public async Task<ActionResult<List<ArticleTag>>> GetAllArticleTagsForSpecificArticle(Guid articleId)
+        [HttpGet]
+        public async Task<IActionResult> GetAllArticleTags()
         {
+            var result = await articleTagsServices.GetAllArticleTagsService();
+            return result.Count == 0 ? NoContent() : Ok(result);
+        }
 
+        [HttpGet("articles/{articleId:guid}")]
+        public async Task<IActionResult> GetAllArticleTagsForSpecificArticle(Guid articleId)
+        {
             var result = await articleTagsServices.GetAllArticleTagsForSpecificArticle(articleId);
             return Ok(result);
-
         }
 
-        [HttpGet("get-Article-Tag-By-Id{Id}")]
+        [HttpGet("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ArticleTag))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-
-        public async Task<ActionResult<ArticleTag>> GetArticleTagById(Guid Id)
+        public async Task<IActionResult> GetArticleTagById(Guid id)
         {
-            try
-            {
-             
-                var result = await articleTagsServices.GetArticleTagByIdService(Id);
-                return Ok(result);
-            
-            }
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+            var result = await articleTagsServices.GetArticleTagByIdService(id);
+            return Ok(result);
         }
 
-        [HttpGet("get-Article-tag-By-Title")]
+        [HttpGet("by-title")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ArticleTag))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<ArticleTag>> GetArticleTagByTitle(string title)
+        public async Task<IActionResult> GetArticleTagByTitle([FromQuery] string title)
         {
-            try
-            {
-                var result = await articleTagsServices.GetArticleTagByTitleService(title);
-                return Ok(result);
-            }
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+            var result = await articleTagsServices.GetArticleTagByTitleService(title);
+            return Ok(result);
         }
 
         [Authorize(Roles = nameof(UserRole.Admin))]
-        [HttpPatch("edit-Article-Tag{Id}")]
+        [HttpPatch("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ArticleTag))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<ArticleTag>> EditArticleTag(Guid Id, ArticleTagDTO request)
+        public async Task<IActionResult> EditArticleTag(Guid id, [FromBody] ArticleTagDTO request)
         {
-            try
-            {
-                var result = await articleTagsServices.EditArticleTagService(Id, request);
-                return Ok(result);
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+            var result = await articleTagsServices.EditArticleTagService(id, request);
+            return Ok(result);
         }
 
         [Authorize(Roles = nameof(UserRole.Admin))]
-        [HttpPatch("add-Articles-To-ArticleTagList{articleTagId},{articleId}")]
+        [HttpPost("{articleTagId:guid}/articles/{articleId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ArticleTag))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<ArticleTag>> AddArticleToArticleTagList(Guid articleTagId, Guid articleId)
+        public async Task<IActionResult> AddArticleToArticleTagList(Guid articleTagId, Guid articleId)
         {
-            try
-            {
-                var result = await articleTagsServices.AddArticleToArticleTagListService(articleTagId, articleId);
-                return Ok(result);
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+            var result = await articleTagsServices.AddArticleToArticleTagListService(articleTagId, articleId);
+            return Ok(result);
         }
 
         [Authorize(Roles = nameof(UserRole.Admin))]
-        [HttpPatch("remove-Articles-From-ArticleTagList{articleTagId},{articleId}")]
+        [HttpDelete("{articleTagId:guid}/articles/{articleId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ArticleTag))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<ArticleTag>> RemoveArticleFromArticleTagList(Guid articleTagId, Guid articleId)
+        public async Task<IActionResult> RemoveArticleFromArticleTagList(Guid articleTagId, Guid articleId)
         {
-            try
-            {
-                var result = await articleTagsServices.RemoveArticleFromArticleTagListService(articleTagId, articleId);
-                return Ok(result);
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+            var result = await articleTagsServices.RemoveArticleFromArticleTagListService(articleTagId, articleId);
+            return Ok(result);
         }
 
         [Authorize(Roles = nameof(UserRole.Admin))]
-        [HttpDelete("delete-ArticleTag{Id}")]
+        [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ArticleTag))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<ArticleTag>> DeleteArticleTag(Guid Id)
+        public async Task<IActionResult> DeleteArticleTag(Guid id)
         {
-            try
-            {
-                var result = await articleTagsServices.DeleteArticleTagService(Id);
-                return Ok(result);
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
+            var result = await articleTagsServices.DeleteArticleTagService(id);
+            return Ok(result);
         }
 
         [Authorize]
-        [HttpPatch("add-Post-To-ArticleTagList{articleTagId},{postId},{postOwnerId}")]
+        [HttpPost("{articleTagId:guid}/posts/{postId:guid}/owners/{postOwnerId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ArticleTag))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<ArticleTag>> AddPostToArticleTagList(Guid articleTagId, Guid postId, Guid postOwnerId)
+        public async Task<IActionResult> AddPostToArticleTagList(Guid articleTagId, Guid postId, Guid postOwnerId)
         {
-            try
-            {
-                var result = await articleTagsServices.AddPostToArticleTagListService(articleTagId, postId,postOwnerId);
-                return Ok(result);
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+            var result = await articleTagsServices.AddPostToArticleTagListService(articleTagId, postId, postOwnerId);
+            return Ok(result);
         }
 
         [Authorize]
-        [HttpPatch("remove-Post-From-ArticleTagList{articleTagId},{postId},{postOwnerId}")]
+        [HttpDelete("{articleTagId:guid}/posts/{postId:guid}/owners/{postOwnerId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ArticleTag))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<ArticleTag>> RemovePostFromArticleTagList(Guid articleTagId, Guid postId,Guid postOwnerId)
+        public async Task<IActionResult> RemovePostFromArticleTagList(Guid articleTagId, Guid postId, Guid postOwnerId)
         {
-            try
-            {
-                var result = await articleTagsServices.RemovePostFromArticleTagListService(articleTagId, postId,postOwnerId);
-                return Ok(result);
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+            var result = await articleTagsServices.RemovePostFromArticleTagListService(articleTagId, postId, postOwnerId);
+            return Ok(result);
         }
-
     }
 }
