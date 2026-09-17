@@ -1,629 +1,97 @@
-﻿using GData.DTOs.GroupchatsDTO;
+﻿// GroupChatsController.cs
+using GData.DTOs.GroupchatsDTO;
 using GData.Entity;
 using GData.Services.Groupchats;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace GData.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GroupChatsController(IGroupChatsServices groupChatsServices, ILogger<GroupChatsController> logger) : ControllerBase
+    public class GroupChatsController(IGroupChatsServices groupChatsServices) : ControllerBase
     {
-
         [Authorize]
-        [HttpPost("create-GroupChat{creatorId}")]
+        [HttpPost("creator/{creatorId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Groupchat))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]   
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<Groupchat>> CreateGroupChat(Guid creatorId, GroupchatDTO request)
+        public async Task<IActionResult> CreateGroupChat(Guid creatorId, [FromBody] GroupchatDTO request)
         {
-            try
-            {
-                
-                var result = await groupChatsServices.CreateGroupChatService(creatorId, request);
-                return Ok(result);
-
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Bad request");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-        }
-
-        [HttpGet("get-All-GroupChats")]
-        public async Task<ActionResult<List<Groupchat>>> GetAllGroupChats()
-        {
-
-            var result= await groupChatsServices.GetAllGroupChatsService();
-
-            if(result.Count<1)
-            {
-
-                return NoContent();
-
-            }
-
+            var result = await groupChatsServices.CreateGroupChatService(creatorId, request);
             return Ok(result);
-
-        }
-        [HttpGet("get-All-GroupChats-Where-User-Is-Member{userId}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Groupchat))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<List<Groupchat>>> GetAllGroupChatsWhereUserIsMember(Guid userId)
-        {
-            try
-            {
-
-                var result = await groupChatsServices.GetAllGroupChatsForUser(userId);
-
-                if (result.Count < 1)
-                {
-
-                    return NoContent();
-
-                }
-
-                return Ok(result);
-
-            }
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Bad request");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
         }
 
-        [HttpGet("get-All-GroupChats-Created-By-User{userId}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Groupchat))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<List<Groupchat>>> GetAllGroupChatsCreatedByUser(Guid userId)
+        [HttpGet]
+        public async Task<IActionResult> GetAllGroupChats()
         {
-
-            try
-            {
-                var result = await groupChatsServices.GetAllGroupChatsCreatedByUser(userId);
-
-                if (result.Count < 1)
-                {
-
-                    return NoContent();
-
-                }
-
-                return Ok(result);
-            }
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Bad request");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+            var result = await groupChatsServices.GetAllGroupChatsService();
+            return result.Count == 0 ? NoContent() : Ok(result);
         }
 
-        [HttpGet("get-GroupChat-By-Id{Id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Groupchat))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<Groupchat>> GetGroupChatById(Guid Id)
+        [HttpGet("member/{userId:guid}")]
+        public async Task<IActionResult> GetAllGroupChatsWhereUserIsMember(Guid userId)
         {
-
-            try
-            {
-                var result = await groupChatsServices.GetGroupChatByIdService(Id);
-                return Ok(result);
-            }
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+            var result = await groupChatsServices.GetAllGroupChatsForUser(userId);
+            return result.Count == 0 ? NoContent() : Ok(result);
         }
 
-        [HttpGet("get-GroupChat-By-ChatName")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Groupchat))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<Groupchat>> GetGroupChatByChatName(string chatName)
+        [HttpGet("created-by/{userId:guid}")]
+        public async Task<IActionResult> GetAllGroupChatsCreatedByUser(Guid userId)
         {
-            try
-            {
-            
-                var result = await groupChatsServices.GetGroupChatByChatNameService(chatName);
-                return Ok(result);
-            
-            }
-            catch (ArgumentNullException nullException)
-            {
+            var result = await groupChatsServices.GetAllGroupChatsCreatedByUser(userId);
+            return result.Count == 0 ? NoContent() : Ok(result);
+        }
 
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
+        [HttpGet("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Groupchat))]
+        public async Task<IActionResult> GetGroupChatById(Guid id)
+        {
+            var result = await groupChatsServices.GetGroupChatByIdService(id);
+            return Ok(result);
+        }
 
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+        [HttpGet("by-name")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Groupchat))]
+        public async Task<IActionResult> GetGroupChatByChatName([FromQuery] string chatName)
+        {
+            var result = await groupChatsServices.GetGroupChatByChatNameService(chatName);
+            return Ok(result);
         }
 
         [Authorize]
-        [HttpPatch("add-Chat-Member{creatorId},{userId},{Id}")]
+        [HttpPost("{id:guid}/members/{userId:guid}/creator/{creatorId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Groupchat))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))] 
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<Groupchat>> AddMemberToGroupChat(Guid creatorId,Guid userId,Guid Id)
+        public async Task<IActionResult> AddMemberToGroupChat(Guid creatorId, Guid userId, Guid id)
         {
-
-            try
-            {
-             
-                var result = await groupChatsServices.AddUserToGroupChatService(creatorId, userId, Id);
-                return Ok(result);
-            
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
+            var result = await groupChatsServices.AddUserToGroupChatService(creatorId, userId, id);
+            return Ok(result);
         }
 
         [Authorize]
-        [HttpPatch("edit-GropuChat-Title{creatorId},{Id}")]
+        [HttpPatch("{id:guid}/title/creator/{creatorId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Groupchat))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<Groupchat>> EditGroupChatTitle(Guid creatorId,Guid Id,GroupchatDTO request)
+        public async Task<IActionResult> EditGroupChatTitle(Guid creatorId, Guid id, [FromBody] GroupchatDTO request)
         {
-            try
-            {
-                var result = await groupChatsServices.EditGroupChatTitleService(creatorId, Id, request);
-                return Ok(result);
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+            var result = await groupChatsServices.EditGroupChatTitleService(creatorId, id, request);
+            return Ok(result);
         }
 
         [Authorize]
+        [HttpDelete("{id:guid}/members/{userId:guid}/creator/{creatorId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Groupchat))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        [HttpPatch("remove-User-From-GroupChat{creatorId},{userId},{Id}")]
-        public async Task<ActionResult<Groupchat>> RemoveUserFromGroupChat(Guid creatorId,Guid userId,Guid Id)
+        public async Task<IActionResult> RemoveUserFromGroupChat(Guid creatorId, Guid userId, Guid id)
         {
-            try
-            {
-             
-                var result = await groupChatsServices.RemoveUserFromGroupChatService(creatorId, userId, Id);
-                return Ok(result);
-            
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (FormatException formatException)
-            {
-
-                logger.LogError(formatException, $"Bad request");
-                return Problem(
-
-                    detail: formatException.Message,
-                    title: "Bad request!",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
+            var result = await groupChatsServices.RemoveUserFromGroupChatService(creatorId, userId, id);
+            return Ok(result);
         }
 
         [Authorize]
-        [HttpDelete("delete-GroupChat{creatorId},{Id}")]
+        [HttpDelete("{id:guid}/creator/{creatorId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Groupchat))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]  
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<Groupchat>> DeleteGroupChat(Guid creatorId,Guid Id)
+        public async Task<IActionResult> DeleteGroupChat(Guid creatorId, Guid id)
         {
-
-            try
-            {
-                var result = await groupChatsServices.DeleteGroupChatService(creatorId, Id);
-                return Ok(result);
-            }
-            catch (UnauthorizedAccessException unauthorizedException)
-            {
-
-                logger.LogError(unauthorizedException, $"Unauthorized access");
-                return Problem(
-
-                    detail: unauthorizedException.Message,
-                    title: "Unauthorized user access",
-                    statusCode: StatusCodes.Status401Unauthorized,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-            catch (ArgumentNullException nullException)
-            {
-
-                logger.LogError(nullException, $"Not Found!");
-                return Problem(
-
-                    detail: nullException.Message,
-                    title: "Not found!",
-                    statusCode: StatusCodes.Status404NotFound,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
-            catch (Exception ex)
-            {
-
-                logger.LogError(ex, $"An unexpected error occured");
-                return Problem(
-
-                    detail: ex.Message,
-                    title: "Internal Server Error",
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    instance: HttpContext.TraceIdentifier
-
-                );
-
-            }
-
+            var result = await groupChatsServices.DeleteGroupChatService(creatorId, id);
+            return Ok(result);
         }
-
     }
 }

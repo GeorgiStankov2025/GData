@@ -2,8 +2,6 @@
 {
     public class ArticleCommentDTO
     {
-     
-        public required string CommentContent { get; set; }=string.Empty;
-
+        public required string CommentContent { get; set; } = string.Empty;
     }
 }

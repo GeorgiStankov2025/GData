@@ -7,15 +7,15 @@ namespace GData.Entity
     {
         public Guid Id { get; set; }
 
-        public required string Username { get; set; }=string.Empty;
+        public required string Username { get; set; } = string.Empty;
 
-        public string PasswordHash {  get; set; }=string.Empty;
+        public string PasswordHash { get; set; } = string.Empty;
 
-        public required string Email { get; set; } =string.Empty;
+        public required string Email { get; set; } = string.Empty;
 
-        public required string Firstname {  get; set; }=string.Empty;
+        public required string Firstname { get; set; } = string.Empty;
 
-        public required string Lastname { get; set;}=string.Empty;
+        public required string Lastname { get; set; } = string.Empty;
 
         public UserRole UserRole { get; set; } = UserRole.User;
 
@@ -40,10 +40,10 @@ namespace GData.Entity
         public List<ArticleComment>? ArticleComments { get; set; }
 
         [JsonIgnore]
-        public List<Groupchat>? ChatsCreated {  get; set; }
+        public List<Groupchat>? ChatsCreated { get; set; }
 
         [JsonIgnore]
-        public List<Groupchat>? UserGroupchats { get; set; } 
+        public List<Groupchat>? UserGroupchats { get; set; }
 
         [JsonIgnore]
         public List<GroupchatMessage>? UserMessages { get; set; }

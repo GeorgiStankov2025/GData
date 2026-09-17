@@ -2,7 +2,6 @@
 using GData.Entity;
 using GData.Exceptions;
 using GData.Repositories.Users;
-using GData.Services.Articles;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Identity;
@@ -10,378 +9,222 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using MimeKit;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq.Expressions;
-using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 using System.Text;
 
+namespace GData.Services.Users;
 
-
-
-namespace GData.Services.Users
+public class AuthServices(IAuthRepository authRepository, IConfiguration configuration) : IAuthServices
 {
-    public class AuthServices(IAuthRepository authRepository, IConfiguration configuration, UserExceptionList exceptionList) : IAuthServices
+    private async Task SendEmailRegistration(User user)
     {
-        private async void SendEmailRegistration(User user)
+        var email = new MimeMessage();
+        email.From.Add(MailboxAddress.Parse("bitproductions2024@gmail.com"));
+
+        try
         {
-
-            var email = new MimeMessage();
-
-            email.From.Add(MailboxAddress.Parse("bitproductions2024@gmail.com"));
             email.To.Add(MailboxAddress.Parse(user.Email));
-            email.Subject = $"GDataRegistration ";
-            email.Body = new TextPart(MimeKit.Text.TextFormat.Html)
-            {
-
-                Text = $"Hi, {user.Username}! Wellcome to GData. You have successfully registered to our website. You can activate your account using the code: {user.VerificationCode} \n\n\n GData Team"
-
-            };
-
-            using var smtp = new SmtpClient();
-
-            await smtp.ConnectAsync("smtp.gmail.com", 465, SecureSocketOptions.SslOnConnect);
-            await smtp.AuthenticateAsync("bitproductions2024@gmail.com", "unbv xvlo wrvs vgnm");
-            await smtp.SendAsync(email);
-            await smtp.DisconnectAsync(true);
-
+        }
+        catch (FormatException)
+        {
+            throw new BadRequestException("Recipient email address format is invalid.");
         }
 
-        public async Task<User> RegisterService(RegisterUserDTO request)
+        email.Subject = "GData Registration";
+        email.Body = new TextPart(MimeKit.Text.TextFormat.Html)
         {
+            Text = $"Hi, {user.Username}! Welcome to GData. You have successfully registered to our website. You can activate your account using the code: {user.VerificationCode} \n\n\n GData Team"
+        };
 
-            
-                
-            if(_ = new System.Net.Mail.MailAddress(request.Email) is not System.Net.Mail.MailAddress)
-            {
+        using var smtp = new MailKit.Net.Smtp.SmtpClient();
+        await smtp.ConnectAsync("smtp.gmail.com", 465, SecureSocketOptions.SslOnConnect);
+        await smtp.AuthenticateAsync("bitproductions2024@gmail.com", "unbv xvlo wrvs vgnm");
+        await smtp.SendAsync(email);
+        await smtp.DisconnectAsync(true);
+    }
 
-                return await exceptionList.InvalidEmail();
+    public async Task<User> RegisterService(RegisterUserDTO request)
+    {
+        if (request == null)
+            throw new BadRequestException("Error processing registration request.");
 
-            }
+        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Username))
+            throw new BadRequestException("Please fill all required fields.");
 
-            List<User> users = await GetAllUsersService();
+        if (!System.Net.Mail.MailAddress.TryCreate(request.Email, out _))
+            throw new BadRequestException("Invalid email format.");
 
-            if (request == null)
-            {
+        if (await authRepository.UsernameExistsAsync(request.Username))
+            throw new BadRequestException("Username already exists.");
 
-               return await exceptionList.ErrorProcessingRequest();
+        if (await authRepository.EmailExistsAsync(request.Email))
+            throw new BadRequestException("Email already exists.");
 
-            }
+        var result = await authRepository.Register(request);
 
-            foreach(var user in users)
-            {
+        await SendEmailRegistration(result);
+        return result;
+    }
 
-               if(request.Username==user.Username)
-               {
+    public async Task<bool> VerifyAccountService(Guid Id, int code)
+    {
+        var user = await authRepository.GetUserById(Id);
 
-                   return await exceptionList.UsernameAlreadyExists();
+        if (user != null)
+        {
+            var result = await authRepository.VerifyAccount(user, code);
+            return result is true;
+        }
 
-               }
+        return false;
+    }
 
-               if(request.Email==user.Email)
-               {
+    public async Task<User> GetUserByUsernameService(string username)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            throw new BadRequestException("No username provided in request.");
+        }
 
-                  return await exceptionList.EmailAlreadyExists();
+        var result = await authRepository.GetUserByUsername(username);
 
-               }
+        if (result is null)
+        {
+            throw new NotFoundException("User not found with specified username.");
+        }
 
-            }
+        return result;
+    }
 
-            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Firstname) || string.IsNullOrWhiteSpace(request.Lastname))
-            {
+    public async Task<User> GetUserByIdService(Guid Id)
+    {
+        if (Id == Guid.Empty)
+        {
+            throw new BadRequestException("No ID provided in request.");
+        }
 
-               return await exceptionList.FillAllBoxes();
+        var result = await authRepository.GetUserById(Id);
 
-            }
-            if (string.IsNullOrWhiteSpace(request.Email) && string.IsNullOrWhiteSpace(request.Username) && string.IsNullOrWhiteSpace(request.Password) && string.IsNullOrWhiteSpace(request.Username) && string.IsNullOrWhiteSpace(request.Firstname) || string.IsNullOrWhiteSpace(request.Lastname))
-            {
+        if (result is null)
+        {
+            throw new NotFoundException("User not found with specified ID.");
+        }
 
-               return await exceptionList.FillAllBoxes();
+        return result;
+    }
 
-            }
-            if (request.Username.Length<8||request.Password.Length<8||request.Firstname.Length<2||request.Lastname.Length<2)
-            {
+    private string CreateJWTToken(User user)
+    {
+        var claims = new List<Claim>()
+        {
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Role, user.UserRole.ToString())
+        };
 
-               return await exceptionList.InvalidData();
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("AppSettings:Token")));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
 
-            }
-            if (request.Username.Length < 8 && request.Password.Length < 8 && request.Firstname.Length < 2 && request.Lastname.Length < 2)
-            {
+        var tokenDescriptor = new JwtSecurityToken(
+            issuer: configuration.GetValue<string>("AppSettings:Issuer"),
+            audience: configuration.GetValue<string>("AppSettings:Audience"),
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(5),
+            signingCredentials: creds
+        );
 
-               return await exceptionList.InvalidData();
-            
-            }
-             
-            var result = await authRepository.Register(request);
-            SendEmailRegistration(result);
+        return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
+    }
+
+    private async Task<TokenDTO> CreateJwtToken(User user)
+    {
+        return new TokenDTO { AccessToken = CreateJWTToken(user) };
+    }
+
+    public async Task<TokenDTO> LoginService(LoginUserDTO request)
+    {
+        var user = await authRepository.GetUserByUsername(request.Username);
+        var passwordHasher = new PasswordHasher<User>();
+
+        if (user is null)
+        {
+            throw new NotFoundException("User does not exist.");
+        }
+
+        if (passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
+        {
+            throw new BadRequestException("Invalid login credentials.");
+        }
+
+        return await CreateJwtToken(user);
+    }
+
+    public async Task<User> ChangePasswordService(Guid Id, ChangePasswordDTO request)
+    {
+        var user = await authRepository.GetUserByUsername(request.Username);
+
+        if (user is null)
+        {
+            throw new NotFoundException("Error processing password change request.");
+        }
+
+        if (Id != user.Id)
+        {
+            throw new ForbiddenException("Invalid user ID for this request.");
+        }
+
+        PasswordHasher<User> passwordHasher = new PasswordHasher<User>();
+
+        if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.NewPassword) || string.IsNullOrWhiteSpace(request.Email))
+        {
+            throw new BadRequestException("Please fill all boxes to change password.");
+        }
+
+        if (request.NewPassword.Length < 8)
+        {
+            throw new BadRequestException("Invalid new password length.");
+        }
+
+        if (request.Username != user.Username || request.Email != user.Email || passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password) != PasswordVerificationResult.Success)
+        {
+            throw new BadRequestException("Invalid user credentials.");
+        }
+
+        if (request.Username != user.Username && request.Email != user.Email && passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password) != PasswordVerificationResult.Success)
+        {
+            throw new BadRequestException("Invalid user credentials.");
+        }
+
+        if (passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.NewPassword) == PasswordVerificationResult.Success)
+        {
+            throw new BadRequestException("New password cannot be the same as old password.");
+        }
+
+        if (user.IsEmailConfirmed == false)
+        {
+            throw new ForbiddenException("Email is not verified.");
+        }
+
+        await authRepository.ChangePassword(request.NewPassword, user);
+        return user;
+    }
+
+    public async Task<List<User>> GetAllUsersService()
+    {
+        return await authRepository.GetAllUsers();
+    }
+
+    public async Task<User> ResendVerificationCodeService(Guid Id)
+    {
+        var user = await GetUserByIdService(Id);
+
+        if (user.IsEmailConfirmed == false)
+        {
+            var result = await authRepository.ResendVerificationCode(user);
+            SendEmailRegistration(user);
             return result;
-            
         }
 
-        public async Task<bool> VerifyAccountService(Guid Id, int code)
-        {
-
-            var user = await authRepository.GetUserById(Id);
-
-            if (user != null)
-            {
-                var result = await authRepository.VerifyAccount(user, code);
-
-                if (result is true)
-                {
-
-                    return true;
-
-                }
-
-                else return false;
-            }
-            else return false;
-
-        }
-
-        public async Task<User> GetUserByUsernameService(string username)
-        {
-
-            if (string.IsNullOrWhiteSpace(username))
-            {
-
-                return await exceptionList.NoRequestUsername();
-
-            }
-            else
-            {
-                var result = await authRepository.GetUserByUsername(username);
-
-                if (result is not null)
-                {
-
-                    return result;
-
-                }
-                else
-                {
-
-                    return await exceptionList.UserNotFoundWithUsername();
-
-                }
-
-            }
-
-        }
-
-        public async Task<User> GetUserByIdService(Guid Id)
-        {
-            if (Id == Guid.Empty)
-            {
-
-                return await exceptionList.NoRequestId();
-
-            }
-            else
-            {
-                var result = await authRepository.GetUserById(Id);
-                if (result is not null)
-                {
-
-                    return result;
-
-                }
-                else
-                {
-
-                    return await exceptionList.UserNotFoundWithId();
-
-                }
-
-            }
-        }
-
-        private string CreateJWTToken(User user)
-        {
-
-            var claims = new List<Claim>()
-            {
-
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
-                new Claim(ClaimTypes.Role, user.UserRole.ToString())
-
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("AppSettings:Token")));
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
-
-            var tokenDescriptor = new JwtSecurityToken(
-
-                issuer: configuration.GetValue<string>("AppSettings:Issuer"),
-                audience: configuration.GetValue<string>("AppSettings:Audience"),
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(5),
-                signingCredentials: creds
-
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
-
-        }
-
-        private async Task<TokenDTO> CreateJwtToken(User user)
-        {
-
-           var token= new TokenDTO { AccessToken = CreateJWTToken(user) };
-
-           return token;
-
-        }
-
-        public async Task<TokenDTO> LoginService(LoginUserDTO request)
-        {
-
-            var user = await authRepository.GetUserByUsername(request.Username);
-
-            var passwordHasher = new PasswordHasher<User>();
-
-            if (user is null)
-            {
-
-                return await exceptionList.UserDoesNotExist();
-
-            }
-            if (passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password)
-                == PasswordVerificationResult.Failed)
-            {
-
-                return await exceptionList.InvalidLoginData();
-
-            }
-            
-            return await CreateJwtToken(user);
-
-        }
-
-        public async Task<User> ChangePasswordService(Guid Id, ChangePasswordDTO request)
-        { 
-
-            var user=await authRepository.GetUserByUsername(request.Username);
-
-            if(Id!=user.Id)
-            {
-
-                return await exceptionList.InvalidUser();
-
-            }
-
-            PasswordHasher<User> passwordHasher = new PasswordHasher<User>();
-
-            if(string.IsNullOrWhiteSpace(request.Username))
-            {
-
-                return await exceptionList.FillAllBoxesChangePass();
-
-            }
-
-            if (string.IsNullOrWhiteSpace(request.Password))
-            {
-
-                return await exceptionList.FillAllBoxesChangePass();
-
-            }
-
-            if (string.IsNullOrWhiteSpace(request.NewPassword))
-            {
-
-                return await exceptionList.FillAllBoxesChangePass();
-
-            }
-
-            if (request.NewPassword.Length<8)
-            {
-
-                return await exceptionList.InvalidNewPassword();
-
-            }
-
-            if (string.IsNullOrWhiteSpace(request.Email))
-            {
-
-                return await exceptionList.FillAllBoxesChangePass();
-
-            }
-
-            if(user is null)
-            {
-
-                return await exceptionList.ErrorProcessingRequestChangePass();
-
-            }
-
-            if(request.Username!=user.Username|| request.Email!=user.Email|| passwordHasher.VerifyHashedPassword(user,user.PasswordHash,request.Password )!= PasswordVerificationResult.Success)
-            {
-
-                return await exceptionList.InvalidUserCredentials();
-
-            }
-
-            if (request.Username != user.Username && request.Email != user.Email && passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password) != PasswordVerificationResult.Success)
-            {
-
-                return await exceptionList.InvalidUserCredentials();
-
-            }
-
-            else if(passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.NewPassword) == PasswordVerificationResult.Success)
-            {
-
-                return await exceptionList.SamePassword();
-
-            }
-
-            if(user.IsEmailConfirmed==false)
-            {
-
-                return await exceptionList.EmailNotVerified();
-
-            }
-
-            await authRepository.ChangePassword(request.NewPassword, user);
-
-            return user;
-
-        }
-
-        public async Task<List<User>> GetAllUsersService()
-        {
-
-            return await authRepository.GetAllUsers();
-
-        }
-
-        public async Task<User> ResendVerificationCodeService(Guid Id)
-        {
- 
-            var user=await GetUserByIdService(Id);
-
-            if (user.IsEmailConfirmed == false)
-            {
-
-                var result = await authRepository.ResendVerificationCode(user);
-
-                SendEmailRegistration(user);
-
-                return result;
-
-            }
-            else
-            {
-
-                return await exceptionList.AccountIsVerified();
-
-            }    
-
-
-        }
-
-        
+        throw new BadRequestException("Account is already verified.");
     }
 }
