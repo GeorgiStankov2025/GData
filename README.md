@@ -28,3 +28,10 @@ GData is a RESTful API built with ASP.NET Core that provides backend services fo
 - **API Documentation**: Swagger/Swashbuckle and Scalar AspNetCore
 - **Email**: MailKit and MimeKit
 - **Package Manager**: NuGet
+
+## 🛠️ Known Technical Debt & Planned Refactoring
+While the application is currently functional with optimized database queries, the following architectural improvements are documented for the next iteration:
+
+- [ ] **Response DTO Mapping:** Implement explicit Response DTOs to decouple internal EF Core entities from API contracts, preventing over-posting/under-posting risks and exposure of sensitive fields (e.g., password hashes).
+- [ ] **RESTful URI Structure:** Refactor nested and legacy route paths to strictly adhere to REST guidelines and resource naming conventions.
+- [ ] **Global Exception Handling & Validation:** Further streamline validation pipelines using FluentValidation to intercept malformed payloads before hitting service layers.
